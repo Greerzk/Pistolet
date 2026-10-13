@@ -39,6 +39,17 @@ const loginLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Intenta de nuevo más tarde.' },
 });
 
+// Raíz informativa: al abrir la URL en el navegador no verás una web,
+// esto es una API JSON. Evita el confuso "Cannot GET /".
+app.get('/', (_req, res) =>
+  res.json({
+    api: 'Pistolet',
+    estado: 'ok',
+    mensaje: 'Esto es la API (JSON), no una web. Prueba /api/health o /api/productos.',
+    endpoints: ['/api/health', '/api/productos', '/api/login', '/api/pedidos', '/api/produccion'],
+  })
+);
+
 // Health check (Render lo usa para saber si el servicio está vivo)
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -48,6 +59,9 @@ app.use('/api/login',      loginLimiter, require('./routes/login'));
 app.use('/api/pedidos',    require('./routes/pedidos'));
 app.use('/api/produccion', require('./routes/produccion'));
 app.use('/api/productos',  require('./routes/productos'));
+
+// Rutas no encontradas -> 404 en JSON (en vez del HTML "Cannot GET ...")
+app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 
 // Traduce los RAISE EXCEPTION de Postgres y demás errores a JSON legible
 app.use((err, _req, res, _next) => {
