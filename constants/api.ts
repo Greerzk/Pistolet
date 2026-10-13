@@ -10,11 +10,11 @@
 
 const DEFAULT_API_URL = 'http://192.168.1.10:3000';
 
-const entorno = (
-  globalThis as { process?: { env?: Record<string, string | undefined> } }
-).process?.env;
-
-export const API_URL = entorno?.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
+// Importante: escribe la expresión LITERAL `process.env.EXPO_PUBLIC_API_URL`.
+// Expo la reemplaza por su valor al compilar; si se accede de otra forma
+// (p. ej. `globalThis.process`), no la incrusta y en web `process` es
+// undefined, por lo que la app caería al valor por defecto de desarrollo.
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
 export const API_PRODUCTOS = `${API_URL}/api/productos`;
 export const API_LOGIN = `${API_URL}/api/login`;
