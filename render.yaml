@@ -1,0 +1,23 @@
+# Blueprint de Render para la API de Pistolet.
+# Con este archivo, Render crea el servicio automáticamente al conectar
+# el repositorio (New → Blueprint).
+#
+# Al desplegar, Render pedirá el valor de DATABASE_URL (lo copias de Neon).
+# JWT_SECRET se genera solo y nunca se muestra.
+
+services:
+  - type: web
+    name: pistolet-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # se pega manualmente en el panel (cadena de Neon)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
