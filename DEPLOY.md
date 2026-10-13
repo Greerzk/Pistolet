@@ -14,10 +14,14 @@ app móvil/web a ese entorno. Al final, las opciones para distribuir la app.
 - **Usuario admin:** `admin@pistolet.mx` (contraseña definida al crearlo).
 - **Imágenes de muestra:** `backend/public/img/productos/pan/*.jpg`
   (reemplázalas por fotos reales y haz `git push`).
-- **Web compilada:** ejecutar `EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com npx expo export --platform web`
-  y publicar la carpeta `dist/`.
+- **Web en producción:** https://pistolet-khaki.vercel.app (Vercel).
+  Está conectada a GitHub: cada `git push` a `main` la vuelve a desplegar sola.
 
-Los pasos 1 a 6 de esta guía ya se ejecutaron. Falta distribuir la app (paso 7 y 8).
+Todo quedó desplegado: base de datos (Neon), API (Render) y web (Vercel).
+En Vercel el proyecto usa **Services** con un único servicio `web` (ver
+`vercel.json`) y su **Root Directory** debe ser la raíz del repo (no
+`backend`). La Variable de Entorno `EXPO_PUBLIC_API_URL` debe valer
+`https://pistolet-api.onrender.com` (Production, Preview y Development).
 
 > **Nota:** la URL de la API se incrusta al compilar. El código debe leerla
 > con la expresión literal `process.env.EXPO_PUBLIC_API_URL` (ver
