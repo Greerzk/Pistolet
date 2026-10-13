@@ -2,10 +2,12 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 // 1. IMPORTACIÓN CORREGIDA
 import { FontAwesome5 } from '@expo/vector-icons';
+import type { ColorValue } from 'react-native';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome5>['name'];
-  color: string;
+  // En SDK 57 el color de los iconos del tab llega como ColorValue.
+  color: ColorValue;
 }) {
   return <FontAwesome5 size={24} style={{ marginBottom: -3 }} {...props} />;
 }

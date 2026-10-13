@@ -16,6 +16,8 @@ app móvil/web a ese entorno. Al final, las opciones para distribuir la app.
   (reemplázalas por fotos reales y haz `git push`).
 - **Web en producción:** https://pistolet-khaki.vercel.app (Vercel).
   Está conectada a GitHub: cada `git push` a `main` la vuelve a desplegar sola.
+- **App móvil (Expo):** SDK 57 — compatible con el **Expo Go** actual de la
+  tienda (Android y iOS). Ya no hace falta instalar un Expo Go antiguo.
 
 Todo quedó desplegado: base de datos (Neon), API (Render) y web (Vercel).
 En Vercel el proyecto usa **Services** con un único servicio `web` (ver

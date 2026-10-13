@@ -77,6 +77,9 @@ export default function EstadoPedidoScreen() {
   }, [pedidoId]);
 
   useEffect(() => {
+    // Carga de datos al montar (patrón estándar en RN). La regla
+    // `set-state-in-effect` de React Compiler da falso positivo aquí.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     cargarPedido();
   }, [cargarPedido]);
 

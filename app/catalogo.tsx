@@ -110,6 +110,10 @@ export default function CatalogoTabsScreen() {
 
   // Carga inicial. Al desmontar se invalidan requests y el debounce.
   useEffect(() => {
+    // Carga de datos al montar (patrón estándar en RN). La regla
+    // `set-state-in-effect` de React Compiler da falso positivo aquí porque
+    // el setState ocurre antes del primer await dentro de fetchProductos.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProductos(true, '');
     return () => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
