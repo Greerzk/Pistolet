@@ -142,8 +142,17 @@ curl -X POST https://pistolet-api.onrender.com/api/login \
 
 La URL de la API se inyecta por variable de entorno, sin editar código:
 
+**macOS / Linux / Git Bash:**
+
 ```bash
 EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com npx expo start
+```
+
+**Windows (PowerShell):**
+
+```powershell
+$env:EXPO_PUBLIC_API_URL = "https://pistolet-api.onrender.com"
+npx expo start
 ```
 
 Antes de compilar, alinea versiones de dependencias de Expo:
@@ -154,30 +163,68 @@ npx expo install --fix
 
 ---
 
-## 8. Distribuir la app (opciones)
+## 8. Distribuir / probar la app
 
 | Opción | Ventajas | Consideraciones |
 |---|---|---|
-| **Web estática** (Vercel/Netlify) | Se comparte con un link/QR, sin instalar; funciona en cualquier celular | La API debe ser HTTPS (ya lo es) y con CORS |
-| **Expo Go** | Inmediato para probar en tu equipo | No es distribución final; requiere red/túnel |
-| **EAS Build (Android)** | APK directo o subir a Play Store | Más fácil que iOS |
+| **Web** (Vercel) | Ya publicada; se comparte con link/QR, sin instalar | Ya funciona: https://pistolet-khaki.vercel.app |
+| **Expo Go** | Inmediato para probar en tu celular, sin compilar | Requiere el código en tu PC y misma red Wi-Fi (o túnel) |
+| **EAS Build (Android)** | **APK** instalable; no necesita PC ni red local | Requiere cuenta gratis en expo.dev |
 | **EAS Build (iOS)** | TestFlight / App Store | Requiere cuenta Apple Developer (~USD 99/año) |
 
-### Web estática (recomendada para empezar)
+### A) Probarla en el celular con Expo Go (sin compilar)
+
+1. Instala **Expo Go** desde Play Store (Android) o App Store (iPhone).
+2. En tu PC, arranca el servidor apuntando a la API de producción:
+
+   **Windows (PowerShell):**
+
+   ```powershell
+   $env:EXPO_PUBLIC_API_URL = "https://pistolet-api.onrender.com"
+   npx expo start
+   ```
+
+   **macOS / Linux:**
+
+   ```bash
+   EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com npx expo start
+   ```
+
+3. Escanea el QR con **Expo Go** (Android) o con la **cámara** (iPhone).
+   - Celular y PC en la **misma red Wi-Fi**.
+   - Si no cargan los archivos, usa túnel: `npx expo start --tunnel`
+     (te pedirá instalar `@expo/ngrok`).
+
+> El bundle de JS se descarga desde tu PC, pero las llamadas a la **API** van a
+> Render por internet: la API no necesita estar en tu red local.
+
+### B) Generar un APK instalable (EAS Build)
+
+Ya quedó preparado `eas.json` (perfil `preview` → **APK**) y el nombre de
+paquete en `app.json` (`com.pistolet.app`). Solo faltan estos pasos, una vez:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com npx expo export --platform web
-# genera la carpeta dist/ → súbela a Vercel o Netlify
+npx eas-cli login            # crea/entra a tu cuenta gratis en expo.dev
+npx eas-cli build:configure  # (opcional) vincula el proyecto
 ```
 
-### Android con EAS (cuando quieras app instalable)
+Para generar el APK (tarda ~10–20 min en la nube de Expo):
 
 ```bash
-npm i -g eas-cli
-eas login
-eas build:configure
-EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com eas build -p android --profile preview
+npm run build:apk
+# equivale a: npx eas-cli build -p android --profile preview
 ```
+
+Cuando termine, EAS te da un **link para descargar el `.apk`**. Ábrelo en el
+celular, permite "instalar apps de origen desconocido" e instálalo. El APK ya
+apunta a `https://pistolet-api.onrender.com` (definido en `eas.json`), así que
+funciona sin tu PC y sin red local.
+
+> Alternativa sin nube (requiere Android SDK + JDK instalados):
+> `npx eas-cli build -p android --profile preview --local`
+>
+> Para Play Store usa `npm run build:apk` con el perfil `production` y luego
+> `npx eas-cli submit -p android`.
 
 ---
 
