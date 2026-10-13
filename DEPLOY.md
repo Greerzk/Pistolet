@@ -5,6 +5,27 @@ app móvil/web a ese entorno. Al final, las opciones para distribuir la app.
 
 ---
 
+## Estado actual (ya desplegado)
+
+- **Repositorio:** https://github.com/Greerzk/Pistolet (rama `main`).
+- **Base de datos:** Neon (PostgreSQL 18). Esquema, funciones y datos de
+  ejemplo cargados. Stock inicial: 100 conchas, 50 cuernos, 30 baguettes.
+- **API en producción:** https://pistolet-api.onrender.com
+- **Usuario admin:** `admin@pistolet.mx` (contraseña definida al crearlo).
+- **Imágenes de muestra:** `backend/public/img/productos/pan/*.jpg`
+  (reemplázalas por fotos reales y haz `git push`).
+- **Web compilada:** ejecutar `EXPO_PUBLIC_API_URL=https://pistolet-api.onrender.com npx expo export --platform web`
+  y publicar la carpeta `dist/`.
+
+Los pasos 1 a 6 de esta guía ya se ejecutaron. Falta distribuir la app (paso 7 y 8).
+
+> **Nota:** la URL de la API se incrusta al compilar. El código debe leerla
+> con la expresión literal `process.env.EXPO_PUBLIC_API_URL` (ver
+> `constants/api.ts`); de lo contrario Expo no la sustituye y la app usaría
+> el valor por defecto de desarrollo.
+
+---
+
 ## 0. Requisitos previos
 
 - Cuenta en **GitHub** (Render despliega desde un repo Git).
