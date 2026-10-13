@@ -27,7 +27,8 @@ app.use(express.json({ limit: '1mb' }));
 
 // Imágenes públicas de productos.
 // Coloca tus archivos en: backend/public/img/productos/pan/*.jpg
-app.use('/img', express.static(path.join(__dirname, 'public')));
+// Se publican en:          /img/productos/pan/<archivo>.jpg
+app.use('/img', express.static(path.join(__dirname, 'public', 'img')));
 
 // Límite de intentos de login (frena ataques de fuerza bruta)
 const loginLimiter = rateLimit({
