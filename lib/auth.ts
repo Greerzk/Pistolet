@@ -11,7 +11,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-import { API_TIMEOUT_MS, API_URL } from '@/constants/api';
+import { API_ME, API_REGISTER, API_TIMEOUT_MS, API_URL } from '@/constants/api';
 
 const KEY_SESSION = 'pistolet.session';
 
@@ -19,6 +19,16 @@ export type Sesion = {
   accessToken: string;
   refreshToken: string;
   user: { id: number; nombre: string; rol: string };
+};
+
+// Datos que regresa GET /api/me (pantalla de perfil).
+export type Perfil = {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string | null;
+  rol: string;
+  creado_en: string;
 };
 
 let cache: Sesion | null = null;
@@ -92,6 +102,20 @@ export async function login(email: string, password: string): Promise<Sesion> {
   return sesion;
 }
 
+// ---------- Registro público ----------
+// Crea una cuenta con rol 'cliente' (igual que la web). No inicia sesión:
+// la pantalla de registro manda al login cuando el backend responde 201.
+
+export async function registrarCliente(datos: {
+  nombre: string;
+  email: string;
+  password: string;
+  telefono?: string;
+}): Promise<{ id: number; nombre: string; email: string; rol: string }> {
+  const { data } = await axios.post(API_REGISTER, datos);
+  return data.user;
+}
+
 // ---------- Axios autenticado ----------
 
 export const api = axios.create({ timeout: API_TIMEOUT_MS });
@@ -146,3 +170,10 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// ---------- Perfil del usuario autenticado ----------
+
+export async function obtenerPerfil(): Promise<Perfil> {
+  const { data } = await api.get(API_ME);
+  return data;
+}

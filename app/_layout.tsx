@@ -43,6 +43,8 @@ export default function TabLayout() {
       {/* Pantallas accesibles por router.push pero sin pestaña en la barra */}
       <Tabs.Screen name="carrito" options={{ href: null }} />
       <Tabs.Screen name="estado-pedido" options={{ href: null }} />
+      <Tabs.Screen name="perfil" options={{ href: null }} />
+      <Tabs.Screen name="registro" options={{ href: null }} />
       <Tabs.Screen name="modal" options={{ href: null }} />
     </Tabs>
   );

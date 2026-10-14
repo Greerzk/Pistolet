@@ -1,14 +1,25 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { login } from '@/lib/auth';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  // Al crear una cuenta redirigimos aquí con el correo ya escrito.
+  const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(emailParam ?? '');
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
+
+  // Si llegamos desde el registro, rellenamos el correo aunque la pantalla
+  // ya estuviera montada.
+  useEffect(() => {
+    // El correo solo se rellena una vez al llegar con el parámetro; la regla
+    // `set-state-in-effect` de React Compiler da falso positivo aquí.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (emailParam) setEmail(emailParam);
+  }, [emailParam]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -48,6 +59,7 @@ export default function HomeScreen() {
         style={styles.input} 
         placeholder="Correo" 
         placeholderTextColor="#8D6E63"
+        value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -67,7 +79,13 @@ export default function HomeScreen() {
         onPress={handleLogin}>
         <Text style={styles.buttonText}>{cargando ? 'ACCEDIENDO...' : 'ACCEDER'}</Text>
       </TouchableOpacity>
-      
+
+      <TouchableOpacity style={styles.link} onPress={() => router.push('/registro')}>
+        <Text style={styles.linkText}>
+          ¿No tienes cuenta? <Text style={styles.linkStrong}>Crear cuenta</Text>
+        </Text>
+      </TouchableOpacity>
+
       <Text style={styles.footer}>Desde 1997</Text>
     </View>
   );
@@ -126,5 +144,16 @@ const styles = StyleSheet.create({
     marginTop: 30, 
     color: '#A1887F', 
     fontSize: 12 
+  },
+  link: { 
+    marginTop: 18 
+  },
+  linkText: { 
+    color: '#8D6E63', 
+    fontSize: 14 
+  },
+  linkStrong: { 
+    color: '#5D4037', 
+    fontWeight: 'bold' 
   }
 });

@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     KeyboardAvoidingView,
@@ -28,10 +29,16 @@ import {
 } from 'react-native';
 
 import { API_PRODUCTOS, API_TIMEOUT_MS, IMAGENES_PRODUCTOS } from '@/constants/api';
+import { cargarSesion } from '@/lib/auth';
 import { carritoStore, useCarrito } from '@/lib/carrito';
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 400;
+
+// Solo 'inicial' reemplaza la pantalla por un spinner a pantalla completa.
+// El resto (búsqueda, refresco, paginar) mantiene montada la barra de
+// búsqueda para que el teclado NO se cierre al escribir.
+type ModoCarga = 'inicial' | 'busqueda' | 'refresco' | 'mas';
 
 type Producto = {
   id: number;
@@ -52,8 +59,10 @@ export default function CatalogoTabsScreen() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [buscando, setBuscando] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [iniciales, setIniciales] = useState('MI');
 
   // Refs para evitar carreras: respuestas viejas, dobles "load more",
   // y para que los callbacks lean siempre el valor actual.
@@ -64,13 +73,18 @@ export default function CatalogoTabsScreen() {
   const searchTermRef = useRef('');
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchProductos = useCallback(async (reset: boolean, term: string) => {
+  const fetchProductos = useCallback(async (modo: ModoCarga, term: string) => {
+    const reset = modo !== 'mas';
     if (!reset && (!hasMoreRef.current || loadingRef.current)) return;
     loadingRef.current = true;
     const seq = ++seqRef.current;
 
-    if (reset) {
+    if (modo === 'inicial') {
       setLoading(true);
+    } else if (modo === 'busqueda') {
+      setBuscando(true);
+    } else if (modo === 'refresco') {
+      setRefreshing(true);
     } else {
       setLoadingMore(true);
     }
@@ -96,16 +110,42 @@ export default function CatalogoTabsScreen() {
       pageRef.current = nextPage;
       hasMoreRef.current = nextPage < (tp ?? 1);
       setProductos((prev) => (reset ? data : [...prev, ...data]));
-    } catch (error) {
-      console.error('Error cargando panes de Pistolet:', error);
+    } catch {
+      // Sin logs en consola: el aviso va en un modal. Solo avisamos cuando
+      // la carga reemplaza la lista (no al paginar, para no ser repetitivos).
+      if (seq === seqRef.current && reset) {
+        Alert.alert(
+          'Sin conexión',
+          'No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.',
+        );
+      }
     } finally {
       if (seq === seqRef.current) {
         loadingRef.current = false;
         setLoading(false);
+        setBuscando(false);
         setRefreshing(false);
         setLoadingMore(false);
       }
     }
+  }, []);
+
+  // Iniciales del usuario para el círculo de perfil de la cabecera.
+  useEffect(() => {
+    let activo = true;
+    cargarSesion().then((sesion) => {
+      if (!activo || !sesion?.user?.nombre) return;
+      const letras = sesion.user.nombre
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((parte) => parte.charAt(0).toUpperCase())
+        .join('');
+      setIniciales(letras || 'MI');
+    });
+    return () => {
+      activo = false;
+    };
   }, []);
 
   // Carga inicial. Al desmontar se invalidan requests y el debounce.
@@ -114,7 +154,7 @@ export default function CatalogoTabsScreen() {
     // `set-state-in-effect` de React Compiler da falso positivo aquí porque
     // el setState ocurre antes del primer await dentro de fetchProductos.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProductos(true, '');
+    fetchProductos('inicial', '');
     return () => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       seqRef.current++; // invalida cualquier request pendiente
@@ -128,18 +168,17 @@ export default function CatalogoTabsScreen() {
     searchTermRef.current = text;
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(() => {
-      fetchProductos(true, text);
+      fetchProductos('busqueda', text);
     }, DEBOUNCE_MS);
   };
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchProductos(true, searchTermRef.current);
+    fetchProductos('refresco', searchTermRef.current);
   }, [fetchProductos]);
 
   // Scroll infinito: al acercarse al final pide la siguiente página.
   const onEndReached = useCallback(() => {
-    fetchProductos(false, searchTermRef.current);
+    fetchProductos('mas', searchTermRef.current);
   }, [fetchProductos]);
 
   const agregarAlCarrito = (item: Producto) => {
@@ -189,8 +228,10 @@ export default function CatalogoTabsScreen() {
               </View>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.profileCircle}>
-            <Text style={styles.profileText}>MI</Text>
+          <TouchableOpacity
+            style={styles.profileCircle}
+            onPress={() => router.push('/perfil')}>
+            <Text style={styles.profileText}>{iniciales}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -203,8 +244,14 @@ export default function CatalogoTabsScreen() {
           placeholderTextColor="#A1887F"
           value={searchTerm}
           onChangeText={handleSearch}
+          autoCorrect={false}
+          returnKeyType="search"
         />
-        <Ionicons name="search-outline" size={20} color="#A1887F" style={{ marginLeft: 10 }} />
+        {buscando ? (
+          <ActivityIndicator size="small" color="#A1887F" style={{ marginLeft: 10 }} />
+        ) : (
+          <Ionicons name="search-outline" size={20} color="#A1887F" style={{ marginLeft: 10 }} />
+        )}
       </View>
 
       {/* 3. BANNER */}
@@ -254,6 +301,8 @@ export default function CatalogoTabsScreen() {
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         onEndReached={onEndReached}
         onEndReachedThreshold={0.4}
         ListEmptyComponent={

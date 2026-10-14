@@ -48,7 +48,7 @@ app.get('/', (_req, res) =>
     mensaje: 'Esto es la API (JSON), no una web. Prueba /api/health o /api/productos.',
     endpoints: [
       '/api/health', '/api/productos', '/api/categorias', '/api/login',
-      '/api/register', '/api/pedidos', '/api/produccion',
+      '/api/register', '/api/me', '/api/pedidos', '/api/produccion',
       '/api/insumos', '/api/users', '/api/reports/inventory',
     ],
   })
@@ -61,6 +61,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth',       require('./routes/auth'));
 app.use('/api/login',      loginLimiter, require('./routes/login'));
 app.use('/api/register',   loginLimiter, require('./routes/register'));
+app.use('/api/me',         require('./routes/me'));
 app.use('/api/pedidos',    require('./routes/pedidos'));
 app.use('/api/produccion', require('./routes/produccion'));
 app.use('/api/productos',  require('./routes/productos'));
