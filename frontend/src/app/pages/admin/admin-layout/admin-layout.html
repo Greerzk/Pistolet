@@ -43,7 +43,7 @@
             <span class="nav-text">Ventas</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="usuarioActual?.rol === 'admin'">
           <a routerLink="/admin/usuarios" routerLinkActive="active" class="nav-link text-white rounded-3 d-flex align-items-center gap-3 py-2.5 px-3">
             <i class="bi bi-people nav-icon fs-5"></i>
             <span class="nav-text">Usuarios</span>

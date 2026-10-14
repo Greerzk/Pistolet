@@ -1,50 +1,78 @@
-# Welcome to your Expo app 👋
+# Pistolet 🥐
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Sistema unificado de una panadería: **una sola API**, **una sola base de datos**
+y dos clientes (app móvil y web) que ven **la misma información en tiempo real**.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+PistoletApp/
+├── app/        App móvil (Expo / React Native, SDK 57)
+├── frontend/   Web (Angular 21) — tienda pública + panel de administración
+├── backend/    API (Node.js + Express) — lógica y reglas de negocio
+└── db/         Esquema y funciones de PostgreSQL
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Arquitectura
 
-## Learn more
+| Capa | Tecnología | Producción |
+|---|---|---|
+| Base de datos | PostgreSQL | **Neon** |
+| API | Node.js + Express | **Render** → https://pistolet-api.onrender.com |
+| Web | Angular 21 | **Vercel** (proyecto con Root Directory `frontend`) |
+| App móvil | Expo (React Native) | Expo Go / EAS Build (APK) |
 
-To learn more about developing your project with Expo, look at the following resources:
+Tanto la app como la web consumen `https://pistolet-api.onrender.com/api` y
+comparten la misma base de datos: cualquier cambio (producto, stock, venta,
+usuario) se refleja en ambos clientes.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Desarrollo local
 
-## Join the community
+**API**
 
-Join our community of developers creating universal apps.
+```bash
+cd backend
+npm install
+# crea backend/.env con DATABASE_URL (Neon) y JWT_SECRET
+npm run dev            # http://localhost:3000
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+**Web**
+
+```bash
+cd frontend
+npm install
+npm start              # http://localhost:4200
+```
+
+**App móvil**
+
+```bash
+npm install
+npx expo start         # Expo Go en tu celular
+```
+
+Por defecto ambos clientes apuntan a la API de Render. Para usar un backend
+local, cambia la URL en `frontend/src/environments/environment.ts` y define
+`EXPO_PUBLIC_API_URL=http://localhost:3000` antes de `npx expo start`.
+
+## Base de datos
+
+En Neon ejecuta, en este orden:
+
+1. `db/schema.sql`
+2. `db/procedimientos.sql`
+
+## Despliegue
+
+Consulta **[DEPLOY.md](DEPLOY.md)** para la guía completa (Neon, Render, Vercel,
+Expo Go y APK con EAS Build).
+
+## Notas
+
+- **Proveedores:** se eliminaron como módulo; el insumo guarda `proveedor` como
+  texto libre.
+- **Pagos:** solo en mostrador (efectivo o tarjeta al recoger).
+- **Autenticación:** JWT (access token de 15 min + refresh token de 30 días);
+  las contraseñas usan `bcryptjs` y nunca se devuelven en las respuestas.
+- **Imágenes:** se sirven desde el backend (`/img/productos/pan/...`). En el plan
+  free de Render el disco es efímero: las imágenes subidas desde el panel se
+  pierden al redeploy (a futuro: Cloudinary/S3).
