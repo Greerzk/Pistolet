@@ -1,10 +1,13 @@
 // =====================================================================
 //  PISTOLET · Registro público de clientes
 //    POST /api/register  { nombre, email, password, telefono? }
-//    → { user: { id, nombre, email, rol } }
+//    → { user: { id, nombre, email, rol } }            (cuenta nueva)
+//    → { user: {...}, reactivado: true }               (cliente dado de baja)
 //
 //  Solo crea usuarios con rol 'cliente'. El personal lo da de alta
 //  el administrador desde /api/users.
+//  Si el correo pertenece a un cliente que eliminó su cuenta (activo = false),
+//  se reactiva en lugar de rechazarse, para permitir volver a registrarse.
 // =====================================================================
 const { Router } = require('express');
 const bcrypt = require('bcryptjs');
@@ -24,14 +27,34 @@ router.post('/', async (req, res, next) => {
     }
 
     const existe = await db.query(
-      'SELECT 1 FROM usuario WHERE lower(email) = lower($1)',
+      'SELECT id, rol, activo FROM usuario WHERE lower(email) = lower($1)',
       [email]
     );
-    if (existe.rowCount) {
+    const previo = existe.rows[0];
+
+    // El correo pertenece a una cuenta ACTIVA, o a una cuenta de personal
+    // (empleado/admin) dada de baja: en ambos casos no se registra desde aquí.
+    if (previo && (previo.activo || previo.rol !== 'cliente')) {
       return res.status(400).json({ error: 'El correo ya está registrado' });
     }
 
     const hash = await bcrypt.hash(String(password), 10);
+
+    // El correo era de un cliente dado de baja (activo = false): reactivamos
+    // su cuenta con los datos nuevos, en vez de rechazarlo. Así un cliente que
+    // eliminó su cuenta puede volver a registrarse con el mismo correo.
+    if (previo) {
+      const { rows } = await db.query(
+        `UPDATE usuario
+            SET nombre = $1, telefono = $2, password_hash = $3,
+                activo = true, actualizado_en = now()
+          WHERE id = $4
+          RETURNING id, nombre, email, rol`,
+        [nombre, telefono || null, hash, previo.id]
+      );
+      return res.json({ user: rows[0], reactivado: true });
+    }
+
     const { rows } = await db.query(
       `INSERT INTO usuario (nombre, email, telefono, password_hash, rol)
        VALUES ($1, $2, $3, $4, 'cliente')

@@ -2,6 +2,7 @@
 //  PISTOLET · Login con JWT
 //    POST /api/login  { email, password }
 //    → { accessToken, refreshToken, user: { id, nombre, rol } }
+//    → 403 { codigo: 'CUENTA_ELIMINADA' } si la cuenta fue dada de baja
 //
 //  · Contraseña verificada con bcrypt (nunca en texto plano).
 //  · El refresh token se guarda HASHEADO (SHA-256) en la tabla 'sesion'.
@@ -25,18 +26,34 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'Correo y contraseña son obligatorios' });
     }
 
+    // Traemos también las cuentas dadas de baja (activo = false) para poder
+    // avisarle al usuario si intenta entrar con una cuenta ya eliminada.
     const { rows } = await db.query(
-      `SELECT id, nombre, rol, password_hash
+      `SELECT id, nombre, rol, activo, password_hash
          FROM usuario
-        WHERE lower(email) = lower($1) AND activo`,
+        WHERE lower(email) = lower($1)`,
       [email]
     );
     const user = rows[0];
 
-    // Mensaje genérico: no revela si el correo existe o no
+    // Mensaje genérico: no revela si el correo existe o no. Comparamos la
+    // contraseña SIEMPRE (aunque la cuenta esté de baja) para no filtrar la
+    // existencia del correo salvo cuando las credenciales son correctas.
     const valido = user && (await bcrypt.compare(password, user.password_hash));
     if (!valido) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Credenciales correctas pero cuenta dada de baja: avisamos para que el
+    // cliente pueda reactivarla volviendo a registrarse con el mismo correo.
+    if (!user.activo) {
+      return res.status(403).json({
+        codigo: 'CUENTA_ELIMINADA',
+        error:
+          user.rol === 'cliente'
+            ? 'Esta cuenta fue eliminada. Vuelve a registrarte con este correo para reactivarla.'
+            : 'Esta cuenta está desactivada. Contacta al administrador.',
+      });
     }
 
     const accessToken = jwt.sign(

@@ -42,8 +42,26 @@ export class LoginComponent {
         }
       },
       error: (err) => {
-        const mensaje = err.error?.error || err.error?.message || 'Error al iniciar sesión';
+        const datos = err.error ?? {};
+        const mensaje = datos.error || datos.message || 'Error al iniciar sesión';
         this.mensajeError = mensaje;
+
+        // Cuenta eliminada: ofrecemos registrarse de nuevo para reactivarla.
+        if (datos.codigo === 'CUENTA_ELIMINADA') {
+          Swal.fire({
+            icon: 'info',
+            title: 'Cuenta eliminada',
+            text: mensaje,
+            showCancelButton: true,
+            confirmButtonText: 'Registrarme de nuevo',
+            cancelButtonText: 'Cerrar',
+            reverseButtons: true
+          }).then((r) => {
+            if (r.isConfirmed) this.router.navigate(['/register']);
+          });
+          return;
+        }
+
         // Sin logs en consola: el aviso se muestra en un modal.
         Swal.fire({
           icon: 'error',

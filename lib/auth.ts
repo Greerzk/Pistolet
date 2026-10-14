@@ -108,9 +108,13 @@ export async function registrarCliente(datos: {
   email: string;
   password: string;
   telefono?: string;
-}): Promise<{ id: number; nombre: string; email: string; rol: string }> {
+}): Promise<{
+  user: { id: number; nombre: string; email: string; rol: string };
+  // true cuando el correo era de un cliente dado de baja y se reactivó.
+  reactivado?: boolean;
+}> {
   const { data } = await axios.post(API_REGISTER, datos);
-  return data.user;
+  return data;
 }
 
 // ---------- Axios autenticado ----------

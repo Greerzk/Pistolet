@@ -17,6 +17,11 @@ export default function HomeScreen() {
     titulo: '',
   });
   const [bienvenida, setBienvenida] = useState<{ visible: boolean; nombre: string }>({ visible: false, nombre: '' });
+  // Aviso cuando se intenta iniciar sesión con una cuenta ya eliminada.
+  const [eliminada, setEliminada] = useState<{ visible: boolean; mensaje: string }>({
+    visible: false,
+    mensaje: '',
+  });
 
   const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
     setAviso({ visible: true, titulo, mensaje, tipo });
@@ -39,8 +44,19 @@ export default function HomeScreen() {
       const sesion = await login(email, password);
       setBienvenida({ visible: true, nombre: sesion.user.nombre });
     } catch (error: any) {
+      const datos = error?.response?.data;
+
+      // La cuenta existe pero fue eliminada: ofrecemos registrarse de nuevo.
+      if (datos?.codigo === 'CUENTA_ELIMINADA') {
+        setEliminada({
+          visible: true,
+          mensaje: datos?.error ?? 'Tu cuenta fue eliminada. Regístrate de nuevo para reactivarla.',
+        });
+        return;
+      }
+
       const msg =
-        error?.response?.data?.error ??
+        datos?.error ??
         error?.message ??
         'No se pudo iniciar sesión. Revisa tus credenciales.';
       mostrarAviso('Error', msg, 'error');
@@ -52,6 +68,11 @@ export default function HomeScreen() {
   const irACatalogo = () => {
     setBienvenida({ visible: false, nombre: '' });
     router.replace('/catalogo');
+  };
+
+  const irARegistro = () => {
+    setEliminada({ visible: false, mensaje: '' });
+    router.push('/registro');
   };
 
   return (
@@ -112,6 +133,16 @@ export default function HomeScreen() {
         mensaje={`Hola ${bienvenida.nombre}, vamos al catálogo.`}
         textoBoton="Continuar"
         onCerrar={irACatalogo}
+      />
+      <ModalAviso
+        visible={eliminada.visible}
+        tipo="aviso"
+        titulo="Cuenta eliminada"
+        mensaje={eliminada.mensaje}
+        textoBoton="Registrarme de nuevo"
+        onCerrar={irARegistro}
+        textoCancelar="Cerrar"
+        onCancelar={() => setEliminada({ visible: false, mensaje: '' })}
       />
     </View>
   );

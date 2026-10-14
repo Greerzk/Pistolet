@@ -37,6 +37,8 @@ export default function RegistroScreen() {
     titulo: '',
   });
   const [exito, setExito] = useState(false);
+  // true cuando el correo pertenecía a un cliente dado de baja y se reactivó.
+  const [reactivado, setReactivado] = useState(false);
 
   const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
     setAviso({ visible: true, titulo, mensaje, tipo });
@@ -78,12 +80,13 @@ export default function RegistroScreen() {
     if (!validar()) return;
     setCargando(true);
     try {
-      await registrarCliente({
+      const respuesta = await registrarCliente({
         nombre: nombre.trim(),
         email: email.trim().toLowerCase(),
         telefono: telefono.trim() || undefined,
         password,
       });
+      setReactivado(Boolean(respuesta?.reactivado));
       setExito(true);
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? 'No se pudo crear la cuenta. Intenta con otro correo.';
@@ -188,8 +191,12 @@ export default function RegistroScreen() {
       <ModalAviso
         visible={exito}
         tipo="exito"
-        titulo="¡Bienvenido a la familia Pistolet!"
-        mensaje="Tu cuenta ha sido creada. Ya puedes iniciar sesión."
+        titulo={reactivado ? '¡Te extrañamos!' : '¡Bienvenido a la familia Pistolet!'}
+        mensaje={
+          reactivado
+            ? 'Tu cuenta fue reactivada. Ya puedes iniciar sesión.'
+            : 'Tu cuenta ha sido creada. Ya puedes iniciar sesión.'
+        }
         textoBoton="Ir a iniciar sesión"
         onCerrar={irALogin}
       />

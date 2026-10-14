@@ -24,12 +24,15 @@ export class RegisterComponent {
   registrar() {
     this.mensajeError = '';
     this.authService.registrarUsuario(this.usuario).subscribe({
-      next: () => {
+      next: (respuesta: any) => {
+        const reactivado = Boolean(respuesta?.reactivado);
         // Mensaje en modal (sin diálogos nativos del navegador).
         Swal.fire({
           icon: 'success',
-          title: '¡Bienvenido a la familia Pistolet!',
-          text: 'Tu cuenta ha sido creada. Ya puedes iniciar sesión.',
+          title: reactivado ? '¡Te extrañamos!' : '¡Bienvenido a la familia Pistolet!',
+          text: reactivado
+            ? 'Tu cuenta fue reactivada. Ya puedes iniciar sesión.'
+            : 'Tu cuenta ha sido creada. Ya puedes iniciar sesión.',
           confirmButtonText: 'Ir a iniciar sesión'
         }).then(() => this.router.navigate(['/login']));
       },
