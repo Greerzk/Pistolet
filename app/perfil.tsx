@@ -28,6 +28,7 @@ import {
   cargarSesion,
   cambiarPassword,
   cerrarSesion,
+  eliminarCuenta,
   obtenerPerfil,
   Perfil,
   Sesion,
@@ -110,6 +111,9 @@ export default function PerfilScreen() {
     titulo: '',
   });
   const [confirmSalir, setConfirmSalir] = useState(false);
+  const [confirmEliminar, setConfirmEliminar] = useState(false);
+  const [eliminandoCuenta, setEliminandoCuenta] = useState(false);
+  const [eliminado, setEliminado] = useState(false);
 
   const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
     setAviso({ visible: true, titulo, mensaje, tipo });
@@ -235,6 +239,33 @@ export default function PerfilScreen() {
   const confirmarSalir = async () => {
     await cerrarSesion();
     setConfirmSalir(false);
+    setSesion(null);
+    setPerfil(null);
+    setPedidos([]);
+    router.replace('/');
+  };
+
+  // Elimina la cuenta: confirmación previa y, al terminar, cerramos sesión.
+  const confirmarEliminarCuenta = async () => {
+    if (eliminandoCuenta) return;
+    setEliminandoCuenta(true);
+    try {
+      await eliminarCuenta();
+      setConfirmEliminar(false);
+      setEliminandoCuenta(false);
+      setEliminado(true);
+    } catch (err: any) {
+      setConfirmEliminar(false);
+      setEliminandoCuenta(false);
+      const msg = err?.response?.data?.error ?? 'No se pudo eliminar la cuenta.';
+      mostrarAviso('Error', msg, 'error');
+    }
+  };
+
+  // Tras leer el aviso de éxito, limpiamos la sesión local y salimos.
+  const finalizarEliminacion = async () => {
+    await cerrarSesion();
+    setEliminado(false);
     setSesion(null);
     setPerfil(null);
     setPedidos([]);
@@ -406,6 +437,11 @@ export default function PerfilScreen() {
             <Ionicons name="log-out-outline" size={20} color="#B71C1C" />
             <Text style={styles.botonSalirTexto}>Cerrar sesión</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.botonEliminar} onPress={() => setConfirmEliminar(true)}>
+            <Ionicons name="trash-outline" size={20} color="#B71C1C" />
+            <Text style={styles.botonEliminarTexto}>Eliminar cuenta</Text>
+          </TouchableOpacity>
         </>
       )}
 
@@ -492,6 +528,24 @@ export default function PerfilScreen() {
         onCerrar={confirmarSalir}
         textoCancelar="Cancelar"
         onCancelar={() => setConfirmSalir(false)}
+      />
+      <ModalAviso
+        visible={confirmEliminar}
+        tipo="error"
+        titulo="Eliminar cuenta"
+        mensaje="Esta acción es permanente: se eliminará tu cuenta y ya no podrás iniciar sesión con ella. ¿Deseas continuar?"
+        textoBoton={eliminandoCuenta ? 'Eliminando…' : 'Sí, eliminar'}
+        onCerrar={confirmarEliminarCuenta}
+        textoCancelar="Cancelar"
+        onCancelar={() => setConfirmEliminar(false)}
+      />
+      <ModalAviso
+        visible={eliminado}
+        tipo="exito"
+        titulo="Cuenta eliminada"
+        mensaje="Tu cuenta se eliminó correctamente. ¡Gracias por tu preferencia!"
+        textoBoton="Entendido"
+        onCerrar={finalizarEliminacion}
       />
     </ScrollView>
   );
@@ -705,4 +759,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   botonSalirTexto: { color: '#B71C1C', fontWeight: 'bold', fontSize: 15 },
+  botonEliminar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+    backgroundColor: '#FFEBEE',
+    borderRadius: 12,
+    paddingVertical: 14,
+  },
+  botonEliminarTexto: { color: '#B71C1C', fontWeight: 'bold', fontSize: 15 },
 });

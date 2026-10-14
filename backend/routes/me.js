@@ -1,8 +1,9 @@
 // =====================================================================
 //  PISTOLET · Perfil del usuario autenticado
-//    GET  /api/me           → { id, nombre, email, telefono, rol, creado_en }
-//    PUT  /api/me           → actualiza nombre, email y teléfono
-//    PUT  /api/me/password  → cambia la contraseña (verifica la actual)
+//    GET    /api/me           → { id, nombre, email, telefono, rol, creado_en }
+//    PUT    /api/me           → actualiza nombre, email y teléfono
+//    PUT    /api/me/password  → cambia la contraseña (verifica la actual)
+//    DELETE /api/me           → el propio usuario elimina su cuenta (baja lógica)
 //
 //  Lo usan la web y la app móvil para pintar y editar la misma
 //  información de la cuenta. NUNCA se regresa password_hash.
@@ -134,6 +135,33 @@ router.put('/password', auth(), async (req, res, next) => {
       'UPDATE usuario SET password_hash = $1, actualizado_en = now() WHERE id = $2',
       [hash, req.user.id]
     );
+
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------- Eliminar mi cuenta (baja lógica) ----------
+// El propio usuario da de baja su cuenta. Se marca activo = false (igual que
+// la baja del panel admin) en vez de borrar la fila: los pedidos del cliente
+// tienen FK ON DELETE RESTRICT y además son historial del negocio.
+// En la misma operación revocamos todas sus sesiones para que el refresh
+// token deje de ser válido de inmediato.
+router.delete('/', auth(), async (req, res, next) => {
+  try {
+    const { rowCount } = await db.query(
+      'UPDATE usuario SET activo = false, actualizado_en = now() WHERE id = $1 AND activo',
+      [req.user.id]
+    );
+
+    if (!rowCount) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    await db.query('UPDATE sesion SET revocada = true WHERE usuario_id = $1', [
+      req.user.id,
+    ]);
 
     res.json({ ok: true });
   } catch (err) {

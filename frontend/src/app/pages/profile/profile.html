@@ -52,6 +52,12 @@
                 <button (click)="abrirPwd()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">Cambiar contraseña</button>
                 <button (click)="cerrarSesion()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Cerrar Sesión</button>
               </div>
+
+              <div class="border-top mt-4 pt-4 text-center">
+                <button (click)="eliminarCuenta()" class="btn btn-link text-danger fw-bold text-decoration-none" [disabled]="eliminando">
+                  {{ eliminando ? 'Eliminando...' : 'Eliminar mi cuenta' }}
+                </button>
+              </div>
             </div>
 
             <!-- Edición de perfil -->

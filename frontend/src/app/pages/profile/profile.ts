@@ -28,6 +28,8 @@ export class ProfileComponent implements OnInit {
   pwdConfirma = '';
   guardandoPwd = false;
 
+  eliminando = false;
+
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -211,6 +213,47 @@ export class ProfileComponent implements OnInit {
           confirmButtonText: 'Entendido'
         });
       }
+    });
+  }
+
+  eliminarCuenta(): void {
+    // Modal de confirmación: la eliminación es permanente.
+    Swal.fire({
+      icon: 'warning',
+      title: 'Eliminar cuenta',
+      text: 'Esta acción es permanente: se eliminará tu cuenta y ya no podrás iniciar sesión con ella. ¿Deseas continuar?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#B71C1C',
+      cancelButtonColor: '#8D6E63',
+      reverseButtons: true
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+
+      this.eliminando = true;
+      this.cdr.detectChanges();
+      this.perfilService.eliminarCuenta().subscribe({
+        next: () => {
+          this.eliminando = false;
+          Swal.fire({
+            icon: 'success',
+            title: 'Cuenta eliminada',
+            text: 'Tu cuenta se eliminó correctamente. ¡Gracias por tu preferencia!',
+            confirmButtonText: 'Entendido'
+          }).then(() => this.limpiar());
+        },
+        error: (err) => {
+          this.eliminando = false;
+          this.cdr.detectChanges();
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.error?.error ?? 'No se pudo eliminar la cuenta.',
+            confirmButtonText: 'Entendido'
+          });
+        }
+      });
     });
   }
 

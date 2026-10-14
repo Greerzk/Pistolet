@@ -33,4 +33,8 @@ export class PerfilService {
   cambiarPassword(datos: { password_actual: string; password_nueva: string }): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/me/password`, datos);
   }
+
+  eliminarCuenta(): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/me`);
+  }
 }

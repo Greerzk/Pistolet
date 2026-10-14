@@ -191,3 +191,9 @@ export async function cambiarPassword(datos: {
   const { data } = await api.put(`${API_ME}/password`, datos);
   return data;
 }
+
+// Elimina (da de baja) la cuenta del usuario autenticado.
+export async function eliminarCuenta(): Promise<{ ok: boolean }> {
+  const { data } = await api.delete(API_ME);
+  return data;
+}
