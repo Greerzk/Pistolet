@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Platform,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { API_URL } from '@/constants/api';
 import { api, cargarSesion } from '@/lib/auth';
 import { carritoAItems, carritoStore, useCarrito } from '@/lib/carrito';
@@ -20,6 +20,15 @@ export default function CarritoScreen() {
   const router = useRouter();
   const carrito = useCarrito();
   const [confirmando, setConfirmando] = useState(false);
+  const [aviso, setAviso] = useState<{ visible: boolean; titulo: string; mensaje?: string; tipo?: TipoAviso }>({
+    visible: false,
+    titulo: '',
+  });
+  const [pedirLogin, setPedirLogin] = useState(false);
+
+  const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
+    setAviso({ visible: true, titulo, mensaje, tipo });
+  };
 
   const items = Object.values(carrito);
   const total = carritoStore.total();
@@ -27,10 +36,7 @@ export default function CarritoScreen() {
   const confirmarPedido = async () => {
     const sesion = await cargarSesion();
     if (!sesion) {
-      Alert.alert('Inicia sesión', 'Necesitas iniciar sesión para hacer tu pedido.', [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Iniciar sesión', onPress: () => router.replace('/') },
-      ]);
+      setPedirLogin(true);
       return;
     }
 
@@ -46,10 +52,15 @@ export default function CarritoScreen() {
       const msg =
         err?.response?.data?.error ??
         'No se pudo confirmar el pedido. Intenta de nuevo.';
-      Alert.alert('Error', msg);
+      mostrarAviso('Error', msg, 'error');
     } finally {
       setConfirmando(false);
     }
+  };
+
+  const irALogin = () => {
+    setPedirLogin(false);
+    router.replace('/');
   };
 
   if (items.length === 0) {
@@ -121,6 +132,24 @@ export default function CarritoScreen() {
           )}
         </TouchableOpacity>
       </View>
+
+      <ModalAviso
+        visible={aviso.visible}
+        titulo={aviso.titulo}
+        mensaje={aviso.mensaje}
+        tipo={aviso.tipo}
+        onCerrar={() => setAviso((prev) => ({ ...prev, visible: false }))}
+      />
+      <ModalAviso
+        visible={pedirLogin}
+        tipo="aviso"
+        titulo="Inicia sesión"
+        mensaje="Necesitas iniciar sesión para hacer tu pedido."
+        textoBoton="Iniciar sesión"
+        onCerrar={irALogin}
+        textoCancelar="Cancelar"
+        onCancelar={() => setPedirLogin(false)}
+      />
     </View>
   );
 }

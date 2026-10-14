@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { API_URL } from '@/constants/api';
 import { api } from '@/lib/auth';
 
@@ -62,6 +62,15 @@ export default function EstadoPedidoScreen() {
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelando, setCancelando] = useState(false);
+  const [aviso, setAviso] = useState<{ visible: boolean; titulo: string; mensaje?: string; tipo?: TipoAviso }>({
+    visible: false,
+    titulo: '',
+  });
+  const [confirmarCancelar, setConfirmarCancelar] = useState(false);
+
+  const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
+    setAviso({ visible: true, titulo, mensaje, tipo });
+  };
 
   const cargarPedido = useCallback(async () => {
     try {
@@ -91,13 +100,19 @@ export default function EstadoPedidoScreen() {
     return () => clearInterval(timer);
   }, [pedido, cargarPedido]);
 
+  const solicitarCancelar = () => {
+    setConfirmarCancelar(true);
+  };
+
   const cancelarPedido = async () => {
+    setConfirmarCancelar(false);
     setCancelando(true);
     try {
       await api.post(`${API_URL}/api/pedidos/${pedidoId}/cancelar`);
       await cargarPedido();
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.error ?? 'No se pudo cancelar el pedido.');
+      const msg = err?.response?.data?.error ?? 'No se pudo cancelar el pedido.';
+      mostrarAviso('Error', msg, 'error');
     } finally {
       setCancelando(false);
     }
@@ -162,7 +177,7 @@ export default function EstadoPedidoScreen() {
           <TouchableOpacity
             style={[styles.secondaryButton, cancelando && styles.primaryButtonDisabled]}
             disabled={cancelando}
-            onPress={cancelarPedido}>
+            onPress={solicitarCancelar}>
             {cancelando ? (
               <ActivityIndicator color="#B71C1C" />
             ) : (
@@ -174,6 +189,24 @@ export default function EstadoPedidoScreen() {
           <Text style={styles.primaryButtonText}>Volver al catálogo</Text>
         </TouchableOpacity>
       </View>
+
+      <ModalAviso
+        visible={aviso.visible}
+        titulo={aviso.titulo}
+        mensaje={aviso.mensaje}
+        tipo={aviso.tipo}
+        onCerrar={() => setAviso((prev) => ({ ...prev, visible: false }))}
+      />
+      <ModalAviso
+        visible={confirmarCancelar}
+        tipo="aviso"
+        titulo="Cancelar pedido"
+        mensaje="¿Seguro que deseas cancelar este pedido?"
+        textoBoton="Sí, cancelar"
+        onCerrar={cancelarPedido}
+        textoCancelar="No"
+        onCancelar={() => setConfirmarCancelar(false)}
+      />
     </View>
   );
 }

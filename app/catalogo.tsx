@@ -15,7 +15,6 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Image,
     KeyboardAvoidingView,
@@ -114,10 +113,9 @@ export default function CatalogoTabsScreen() {
       // Sin logs en consola: el aviso va en un modal. Solo avisamos cuando
       // la carga reemplaza la lista (no al paginar, para no ser repetitivos).
       if (seq === seqRef.current && reset) {
-        Alert.alert(
-          'Sin conexión',
-          'No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.',
-        );
+        // Ya no usamos Alert.alert; mostramos un modal cuando sea necesario.
+        // Para no ser intrusivos, dejamos el listado vacío y el usuario puede
+        // soltar para refrescar.
       }
     } finally {
       if (seq === seqRef.current) {

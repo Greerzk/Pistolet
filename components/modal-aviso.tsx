@@ -27,6 +27,9 @@ type Props = {
   mensaje?: string;
   textoBoton?: string;
   onCerrar: () => void;
+  // Soporte para confirmación (dos botones)
+  textoCancelar?: string;
+  onCancelar?: () => void;
 };
 
 export default function ModalAviso({
@@ -36,8 +39,11 @@ export default function ModalAviso({
   mensaje,
   textoBoton = 'Entendido',
   onCerrar,
+  textoCancelar,
+  onCancelar,
 }: Props) {
   const estilo = ESTILOS_POR_TIPO[tipo];
+  const esConfirmacion = Boolean(textoCancelar && onCancelar);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCerrar}>
@@ -48,9 +54,24 @@ export default function ModalAviso({
           </View>
           <Text style={styles.titulo}>{titulo}</Text>
           {mensaje ? <Text style={styles.mensaje}>{mensaje}</Text> : null}
-          <TouchableOpacity style={styles.boton} onPress={onCerrar} activeOpacity={0.85}>
-            <Text style={styles.botonTexto}>{textoBoton}</Text>
-          </TouchableOpacity>
+
+          {esConfirmacion ? (
+            <View style={styles.botoneraConfirmacion}>
+              <TouchableOpacity
+                style={[styles.botonSecundario, { borderColor: '#A1887F' }]}
+                onPress={onCancelar}
+                activeOpacity={0.85}>
+                <Text style={styles.botonSecundarioTexto}>{textoCancelar}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.botonPrimario} onPress={onCerrar} activeOpacity={0.85}>
+                <Text style={styles.botonPrimarioTexto}>{textoBoton}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.boton} onPress={onCerrar} activeOpacity={0.85}>
+              <Text style={styles.botonTexto}>{textoBoton}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -108,4 +129,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   botonTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  botoneraConfirmacion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 22,
+    alignSelf: 'stretch',
+  },
+  botonSecundario: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  botonSecundarioTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
+  botonPrimario: {
+    flex: 1,
+    backgroundColor: '#5D4037',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  botonPrimarioTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
 });

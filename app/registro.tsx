@@ -1,16 +1,13 @@
 // =====================================================================
-//  PISTOLET · Registro de clientes (app móvil)
-//    POST /api/register  { nombre, email, password, telefono? }
-//
-//  Igual que la web: siempre crea cuentas con rol 'cliente'.
-//  Validación de campos en el cliente + mensajes en modal.
+//  PISTOLET · Registro de cliente (app móvil)
+//  Usa el MISMO backend que la web: POST /api/register (forzado a rol 'cliente')
+//  Muestra validaciones y mensajes en modal con el estilo de la marca.
 // =====================================================================
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -23,45 +20,7 @@ import {
 import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { registrarCliente } from '@/lib/auth';
 
-const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-type Errores = Partial<Record<'nombre' | 'email' | 'telefono' | 'password' | 'confirmar', string>>;
-
-type Aviso = {
-  visible: boolean;
-  tipo: TipoAviso;
-  titulo: string;
-  mensaje?: string;
-  textoBoton?: string;
-  alCerrar?: () => void;
-};
-
-type CampoProps = {
-  etiqueta: string;
-  valor: string;
-  alCambiar: (texto: string) => void;
-  error?: string;
-  derecha?: React.ReactNode;
-} & Omit<React.ComponentProps<typeof TextInput>, 'value' | 'onChangeText' | 'style'>;
-
-function Campo({ etiqueta, valor, alCambiar, error, derecha, ...props }: CampoProps) {
-  return (
-    <View style={styles.campo}>
-      <Text style={styles.etiqueta}>{etiqueta}</Text>
-      <View style={[styles.inputWrap, error ? styles.inputError : null]}>
-        <TextInput
-          style={styles.input}
-          value={valor}
-          onChangeText={alCambiar}
-          placeholderTextColor="#8D6E63"
-          {...props}
-        />
-        {derecha}
-      </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
-  );
-}
+const RE_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegistroScreen() {
   const router = useRouter();
@@ -70,231 +29,192 @@ export default function RegistroScreen() {
   const [email, setEmail] = useState('');
   const [telefono, setTelefono] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmar, setConfirmar] = useState('');
-  const [verPassword, setVerPassword] = useState(false);
+  const [confirma, setConfirma] = useState('');
+  const [cargando, setCargando] = useState(false);
 
-  const [errores, setErrores] = useState<Errores>({});
-  const [enviando, setEnviando] = useState(false);
-  const [aviso, setAviso] = useState<Aviso>({ visible: false, tipo: 'info', titulo: '' });
+  const [aviso, setAviso] = useState<{ visible: boolean; titulo: string; mensaje?: string; tipo?: TipoAviso }>({
+    visible: false,
+    titulo: '',
+  });
+  const [exito, setExito] = useState(false);
 
-  const validar = (): Errores => {
-    const e: Errores = {};
-
-    if (!nombre.trim()) e.nombre = 'Escribe tu nombre completo.';
-    else if (nombre.trim().length < 3) e.nombre = 'El nombre es demasiado corto.';
-
-    if (!email.trim()) e.email = 'Escribe tu correo.';
-    else if (!REGEX_EMAIL.test(email.trim())) e.email = 'El correo no es válido.';
-
-    if (telefono.trim() && !/^\d{10}$/.test(telefono.trim()))
-      e.telefono = 'El teléfono debe tener 10 dígitos.';
-
-    if (!password) e.password = 'Escribe una contraseña.';
-    else if (password.length < 6) e.password = 'La contraseña debe tener al menos 6 caracteres.';
-
-    if (!confirmar) e.confirmar = 'Repite la contraseña.';
-    else if (confirmar !== password) e.confirmar = 'Las contraseñas no coinciden.';
-
-    return e;
+  const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
+    setAviso({ visible: true, titulo, mensaje, tipo });
   };
 
-  const cerrarAviso = () => {
-    const alCerrar = aviso.alCerrar;
-    setAviso((previo) => ({ ...previo, visible: false }));
-    alCerrar?.();
+  const validar = () => {
+    if (!nombre.trim()) {
+      mostrarAviso('Campo obligatorio', 'Escribe tu nombre completo.', 'aviso');
+      return false;
+    }
+    if (!email.trim()) {
+      mostrarAviso('Campo obligatorio', 'Escribe tu correo electrónico.', 'aviso');
+      return false;
+    }
+    if (!RE_CORREO.test(email.trim().toLowerCase())) {
+      mostrarAviso('Correo inválido', 'Revisa el formato de tu correo.', 'aviso');
+      return false;
+    }
+    if (telefono.trim() && telefono.trim().length > 20) {
+      mostrarAviso('Teléfono inválido', 'El teléfono es demasiado largo.', 'aviso');
+      return false;
+    }
+    if (!password) {
+      mostrarAviso('Campo obligatorio', 'Escribe una contraseña.', 'aviso');
+      return false;
+    }
+    if (password.length < 6) {
+      mostrarAviso('Contraseña inválida', 'La contraseña debe tener al menos 6 caracteres.', 'aviso');
+      return false;
+    }
+    if (password !== confirma) {
+      mostrarAviso('No coinciden', 'La contraseña y la confirmación no coinciden.', 'aviso');
+      return false;
+    }
+    return true;
   };
 
   const registrar = async () => {
-    const e = validar();
-    setErrores(e);
-
-    if (Object.keys(e).length > 0) {
-      setAviso({
-        visible: true,
-        tipo: 'aviso',
-        titulo: 'Revisa tus datos',
-        mensaje: 'Corrige los campos marcados para continuar.',
-      });
-      return;
-    }
-
-    const correo = email.trim().toLowerCase();
-    setEnviando(true);
+    if (!validar()) return;
+    setCargando(true);
     try {
       await registrarCliente({
         nombre: nombre.trim(),
-        email: correo,
-        password,
+        email: email.trim().toLowerCase(),
         telefono: telefono.trim() || undefined,
+        password,
       });
-      setAviso({
-        visible: true,
-        tipo: 'exito',
-        titulo: '¡Bienvenido a la familia Pistolet!',
-        mensaje: 'Tu cuenta ha sido creada. Ahora puedes iniciar sesión.',
-        textoBoton: 'Ir a iniciar sesión',
-        alCerrar: () => router.replace({ pathname: '/', params: { email: correo } }),
-      });
-    } catch (error: any) {
-      const mensaje =
-        error?.response?.data?.error ??
-        error?.message ??
-        'No se pudo crear la cuenta. Intenta de nuevo.';
-      setAviso({
-        visible: true,
-        tipo: 'error',
-        titulo: 'No se pudo crear la cuenta',
-        mensaje,
-      });
+      setExito(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'No se pudo crear la cuenta. Intenta con otro correo.';
+      mostrarAviso('No se pudo crear la cuenta', msg, 'error');
     } finally {
-      setEnviando(false);
+      setCargando(false);
     }
   };
 
+  const irALogin = () => {
+    setExito(false);
+    router.replace(`/(tabs)?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color="#5D4037" />
-          <Text style={styles.backText}>Regresar</Text>
-        </TouchableOpacity>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={22} color="#5D4037" />
+        <Text style={styles.backText}>Regresar</Text>
+      </TouchableOpacity>
 
-        <Text style={styles.title}>Crear Cuenta</Text>
-        <Text style={styles.subtitle}>Únete a la familia Pistolet</Text>
+      <Text style={styles.titulo}>Crear cuenta</Text>
+      <Text style={styles.subtitulo}>Regístrate para hacer pedidos desde la app</Text>
 
-        <Campo
-          etiqueta="Nombre completo"
-          valor={nombre}
-          alCambiar={setNombre}
-          error={errores.nombre}
-          placeholder="Tu nombre"
+      <View style={styles.form}>
+        <Text style={styles.label}>Nombre completo *</Text>
+        <TextInput
+          value={nombre}
+          onChangeText={setNombre}
+          placeholder="Tu nombre y apellidos"
+          placeholderTextColor="#A1887F"
+          style={styles.input}
           autoCapitalize="words"
         />
 
-        <Campo
-          etiqueta="Correo"
-          valor={email}
-          alCambiar={setEmail}
-          error={errores.email}
-          placeholder="tucorreo@ejemplo.com"
+        <Text style={styles.label}>Correo electrónico *</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="correo@ejemplo.com"
+          placeholderTextColor="#A1887F"
+          style={styles.input}
           autoCapitalize="none"
           keyboardType="email-address"
-          autoCorrect={false}
         />
 
-        <Campo
-          etiqueta="Teléfono (opcional)"
-          valor={telefono}
-          alCambiar={(texto) => setTelefono(texto.replace(/[^0-9]/g, ''))}
-          error={errores.telefono}
-          placeholder="10 dígitos"
+        <Text style={styles.label}>Teléfono (opcional)</Text>
+        <TextInput
+          value={telefono}
+          onChangeText={setTelefono}
+          placeholder="0000000000"
+          placeholderTextColor="#A1887F"
+          style={styles.input}
           keyboardType="phone-pad"
-          maxLength={10}
         />
 
-        <Campo
-          etiqueta="Contraseña"
-          valor={password}
-          alCambiar={setPassword}
-          error={errores.password}
+        <Text style={styles.label}>Contraseña *</Text>
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
           placeholder="Mínimo 6 caracteres"
-          secureTextEntry={!verPassword}
-          autoCapitalize="none"
-          derecha={
-            <TouchableOpacity onPress={() => setVerPassword((v) => !v)} style={styles.ojo}>
-              <Ionicons
-                name={verPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={20}
-                color="#A1887F"
-              />
-            </TouchableOpacity>
-          }
+          placeholderTextColor="#A1887F"
+          style={styles.input}
+          secureTextEntry
         />
 
-        <Campo
-          etiqueta="Confirmar contraseña"
-          valor={confirmar}
-          alCambiar={setConfirmar}
-          error={errores.confirmar}
+        <Text style={styles.label}>Confirmar contraseña *</Text>
+        <TextInput
+          value={confirma}
+          onChangeText={setConfirma}
           placeholder="Repite tu contraseña"
-          secureTextEntry={!verPassword}
-          autoCapitalize="none"
+          placeholderTextColor="#A1887F"
+          style={styles.input}
+          secureTextEntry
         />
 
         <TouchableOpacity
-          style={[styles.button, enviando && styles.buttonDisabled]}
-          disabled={enviando}
-          onPress={registrar}>
-          {enviando ? (
+          style={[styles.boton, cargando && styles.botonDeshabilitado]}
+          onPress={registrar}
+          disabled={cargando}>
+          {cargando ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>CREAR CUENTA</Text>
+            <Text style={styles.botonTexto}>Crear cuenta</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.linkRow} onPress={() => router.back()}>
-          <Text style={styles.linkText}>
+        <TouchableOpacity style={styles.link} onPress={() => router.replace('/(tabs)')}>
+          <Text style={styles.linkTexto}>
             ¿Ya tienes cuenta? <Text style={styles.linkStrong}>Inicia sesión</Text>
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       <ModalAviso
         visible={aviso.visible}
-        tipo={aviso.tipo}
         titulo={aviso.titulo}
         mensaje={aviso.mensaje}
-        textoBoton={aviso.textoBoton ?? 'Entendido'}
-        onCerrar={cerrarAviso}
+        tipo={aviso.tipo}
+        onCerrar={() => setAviso((prev) => ({ ...prev, visible: false }))}
       />
-    </KeyboardAvoidingView>
+      <ModalAviso
+        visible={exito}
+        tipo="exito"
+        titulo="¡Bienvenido a la familia Pistolet!"
+        mensaje="Tu cuenta ha sido creada. Ya puedes iniciar sesión."
+        textoBoton="Ir a iniciar sesión"
+        onCerrar={irALogin}
+      />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFBF5' },
-  scroll: {
-    padding: 25,
+  content: {
+    padding: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 60,
   },
-  back: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  back: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   backText: { color: '#5D4037', fontWeight: '600', marginLeft: 6, fontSize: 15 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#5D4037', textAlign: 'center' },
-  subtitle: { fontSize: 14, color: '#8D6E63', textAlign: 'center', marginBottom: 30, marginTop: 4 },
-  campo: { marginBottom: 16 },
-  etiqueta: { color: '#5D4037', fontWeight: '600', fontSize: 13, marginBottom: 6 },
-  inputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5EDE3',
-    borderRadius: 10,
-    paddingHorizontal: 15,
-  },
-  inputError: { borderWidth: 1.5, borderColor: '#B71C1C' },
-  input: { flex: 1, height: 52, color: '#5D4037', fontSize: 16 },
-  ojo: { padding: 4, marginLeft: 6 },
-  errorText: { color: '#B71C1C', fontSize: 12, marginTop: 5, marginLeft: 4 },
-  button: {
-    backgroundColor: '#5D4037',
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  linkRow: { marginTop: 22, alignItems: 'center' },
-  linkText: { color: '#8D6E63', fontSize: 14 },
+  titulo: { fontSize: 26, fontWeight: 'bold', color: '#3E2723' },
+  subtitulo: { fontSize: 15, color: '#8D6E63', marginTop: 4, marginBottom: 20 },
+  form: { backgroundColor: '#fff', borderRadius: 16, padding: 18, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
+  label: { fontSize: 14, fontWeight: '600', color: '#5D4037', marginBottom: 6, marginTop: 10 },
+  input: { backgroundColor: '#F5EDE3', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 12, color: '#3E2723', fontSize: 15 },
+  boton: { marginTop: 22, backgroundColor: '#5D4037', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
+  botonDeshabilitado: { opacity: 0.6 },
+  botonTexto: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  link: { marginTop: 16, alignItems: 'center' },
+  linkTexto: { color: '#8D6E63', fontSize: 15 },
   linkStrong: { color: '#5D4037', fontWeight: 'bold' },
 });

@@ -10,18 +10,28 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { API_PEDIDOS } from '@/constants/api';
-import { api, cargarSesion, cerrarSesion, obtenerPerfil, Perfil, Sesion } from '@/lib/auth';
+import {
+  actualizarPerfil,
+  api,
+  cargarSesion,
+  cambiarPassword,
+  cerrarSesion,
+  obtenerPerfil,
+  Perfil,
+  Sesion,
+} from '@/lib/auth';
 
 const ETIQUETA_ROL: Record<string, string> = {
   cliente: 'Cliente',
@@ -80,6 +90,106 @@ export default function PerfilScreen() {
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [pedidos, setPedidos] = useState<PedidoResumen[]>([]);
 
+  // Edición de perfil
+  const [editando, setEditando] = useState(false);
+  const [formNombre, setFormNombre] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formTelefono, setFormTelefono] = useState('');
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+
+  // Cambio de contraseña
+  const [cambiandoPwd, setCambiandoPwd] = useState(false);
+  const [pwdActual, setPwdActual] = useState('');
+  const [pwdNueva, setPwdNueva] = useState('');
+  const [pwdConfirma, setPwdConfirma] = useState('');
+  const [guardandoPwd, setGuardandoPwd] = useState(false);
+
+  // Modal
+  const [aviso, setAviso] = useState<{ visible: boolean; titulo: string; mensaje?: string; tipo?: TipoAviso }>({
+    visible: false,
+    titulo: '',
+  });
+  const [confirmSalir, setConfirmSalir] = useState(false);
+
+  const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
+    setAviso({ visible: true, titulo, mensaje, tipo });
+  };
+
+  const iniciarEdicion = () => {
+    if (!perfil) return;
+    setFormNombre(perfil.nombre);
+    setFormEmail(perfil.email);
+    setFormTelefono(perfil.telefono ?? '');
+    setEditando(true);
+  };
+
+  const cancelarEdicion = () => {
+    setEditando(false);
+    setGuardandoPerfil(false);
+  };
+
+  const guardarPerfil = async () => {
+    if (!perfil) return;
+    if (!formNombre.trim() || !formEmail.trim()) {
+      mostrarAviso('Datos incompletos', 'Nombre y correo son obligatorios.', 'aviso');
+      return;
+    }
+    setGuardandoPerfil(true);
+    try {
+      const actualizado = await actualizarPerfil({
+        nombre: formNombre.trim(),
+        email: formEmail.trim().toLowerCase(),
+        telefono: formTelefono.trim() || null,
+      });
+      setPerfil(actualizado);
+      setEditando(false);
+      mostrarAviso('Perfil actualizado', 'Tu información se guardó correctamente.', 'exito');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'No se pudo actualizar el perfil.';
+      mostrarAviso('Error', msg, 'error');
+    } finally {
+      setGuardandoPerfil(false);
+    }
+  };
+
+  const abrirCambioPwd = () => {
+    setPwdActual('');
+    setPwdNueva('');
+    setPwdConfirma('');
+    setCambiandoPwd(true);
+  };
+
+  const cancelarCambioPwd = () => {
+    setCambiandoPwd(false);
+    setGuardandoPwd(false);
+  };
+
+  const guardarPwd = async () => {
+    if (!pwdActual || !pwdNueva || !pwdConfirma) {
+      mostrarAviso('Datos incompletos', 'Completa todos los campos.', 'aviso');
+      return;
+    }
+    if (pwdNueva.length < 6) {
+      mostrarAviso('Contraseña inválida', 'La nueva contraseña debe tener al menos 6 caracteres.', 'aviso');
+      return;
+    }
+    if (pwdNueva !== pwdConfirma) {
+      mostrarAviso('No coinciden', 'La nueva contraseña y la confirmación no coinciden.', 'aviso');
+      return;
+    }
+    setGuardandoPwd(true);
+    try {
+      await cambiarPassword({ password_actual: pwdActual, password_nueva: pwdNueva });
+      setCambiandoPwd(false);
+      mostrarAviso('Contraseña actualizada', 'Tu contraseña se cambió correctamente.', 'exito');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'No se pudo cambiar la contraseña.';
+      mostrarAviso('Error', msg, 'error');
+    } finally {
+      setGuardandoPwd(false);
+    }
+  };
+
   const cargar = useCallback(async () => {
     const s = await cargarSesion();
     setSesion(s);
@@ -119,20 +229,16 @@ export default function PerfilScreen() {
   }, [cargar]);
 
   const cerrar = () => {
-    Alert.alert('Cerrar sesión', '¿Seguro que quieres salir de tu cuenta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Salir',
-        style: 'destructive',
-        onPress: async () => {
-          await cerrarSesion();
-          setSesion(null);
-          setPerfil(null);
-          setPedidos([]);
-          router.replace('/');
-        },
-      },
-    ]);
+    setConfirmSalir(true);
+  };
+
+  const confirmarSalir = async () => {
+    await cerrarSesion();
+    setConfirmSalir(false);
+    setSesion(null);
+    setPerfil(null);
+    setPedidos([]);
+    router.replace('/');
   };
 
   if (cargando) {
@@ -184,9 +290,81 @@ export default function PerfilScreen() {
 
       {/* Datos de la cuenta */}
       <View style={styles.tarjeta}>
-        <Fila icono="mail-outline" etiqueta="Correo" valor={correo} />
-        <Fila icono="call-outline" etiqueta="Teléfono" valor={telefono} />
-        <Fila icono="calendar-outline" etiqueta="Miembro desde" valor={perfil ? formatearFecha(perfil.creado_en) : '—'} sinLinea />
+        {editando ? (
+          <>
+            <View style={styles.filaEditable}>
+              <Ionicons name="person-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <View style={styles.filaTextos}>
+                <Text style={styles.filaEtiqueta}>Nombre completo</Text>
+                <TextInput
+                  value={formNombre}
+                  onChangeText={setFormNombre}
+                  placeholder="Tu nombre"
+                  placeholderTextColor="#A1887F"
+                  style={styles.input}
+                />
+              </View>
+            </View>
+            <View style={styles.filaEditable}>
+              <Ionicons name="mail-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <View style={styles.filaTextos}>
+                <Text style={styles.filaEtiqueta}>Correo electrónico</Text>
+                <TextInput
+                  value={formEmail}
+                  onChangeText={setFormEmail}
+                  placeholder="correo@ejemplo.com"
+                  placeholderTextColor="#A1887F"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={styles.input}
+                />
+              </View>
+            </View>
+            <View style={[styles.filaEditable, styles.filaSinLinea]}>
+              <Ionicons name="call-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <View style={styles.filaTextos}>
+                <Text style={styles.filaEtiqueta}>Teléfono</Text>
+                <TextInput
+                  value={formTelefono}
+                  onChangeText={setFormTelefono}
+                  placeholder="(opcional)"
+                  placeholderTextColor="#A1887F"
+                  keyboardType="phone-pad"
+                  style={styles.input}
+                />
+              </View>
+            </View>
+
+            <View style={styles.botonesEditar}>
+              <TouchableOpacity
+                style={[styles.botonSec, guardandoPerfil && styles.botonDeshabilitado]}
+                onPress={cancelarEdicion}
+                disabled={guardandoPerfil}>
+                <Text style={styles.botonSecTexto}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.botonPri, guardandoPerfil && styles.botonDeshabilitado]}
+                onPress={guardarPerfil}
+                disabled={guardandoPerfil}>
+                {guardandoPerfil ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botonPriTexto}>Guardar cambios</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <>
+            <Fila icono="mail-outline" etiqueta="Correo" valor={correo} />
+            <Fila icono="call-outline" etiqueta="Teléfono" valor={telefono} />
+            <Fila icono="calendar-outline" etiqueta="Miembro desde" valor={perfil ? formatearFecha(perfil.creado_en) : '—'} sinLinea />
+            <TouchableOpacity style={styles.botonEditar} onPress={iniciarEdicion}>
+              <Ionicons name="create-outline" size={20} color="#5D4037" />
+              <Text style={styles.botonEditarTexto}>Editar perfil</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Pedidos del cliente */}
@@ -217,10 +395,104 @@ export default function PerfilScreen() {
         ))
       )}
 
-      <TouchableOpacity style={styles.botonSalir} onPress={cerrar}>
-        <Ionicons name="log-out-outline" size={20} color="#B71C1C" />
-        <Text style={styles.botonSalirTexto}>Cerrar sesión</Text>
-      </TouchableOpacity>
+      {!editando && !cambiandoPwd && (
+        <>
+          <TouchableOpacity style={styles.botonCambiarPwd} onPress={abrirCambioPwd}>
+            <Ionicons name="key-outline" size={20} color="#5D4037" />
+            <Text style={styles.botonCambiarPwdTexto}>Cambiar contraseña</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.botonSalir} onPress={cerrar}>
+            <Ionicons name="log-out-outline" size={20} color="#B71C1C" />
+            <Text style={styles.botonSalirTexto}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {cambiandoPwd && (
+        <View style={styles.tarjeta}>
+          <Text style={styles.seccion}>Cambiar contraseña</Text>
+          <View style={styles.filaEditable}>
+            <Ionicons name="lock-closed-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <View style={styles.filaTextos}>
+              <Text style={styles.filaEtiqueta}>Contraseña actual</Text>
+              <TextInput
+                value={pwdActual}
+                onChangeText={setPwdActual}
+                placeholder="Ingresa tu contraseña actual"
+                placeholderTextColor="#A1887F"
+                secureTextEntry
+                style={styles.input}
+              />
+            </View>
+          </View>
+          <View style={styles.filaEditable}>
+            <Ionicons name="key-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <View style={styles.filaTextos}>
+              <Text style={styles.filaEtiqueta}>Nueva contraseña</Text>
+              <TextInput
+                value={pwdNueva}
+                onChangeText={setPwdNueva}
+                placeholder="Mínimo 6 caracteres"
+                placeholderTextColor="#A1887F"
+                secureTextEntry
+                style={styles.input}
+              />
+            </View>
+          </View>
+          <View style={[styles.filaEditable, styles.filaSinLinea]}>
+            <Ionicons name="checkmark-circle-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <View style={styles.filaTextos}>
+              <Text style={styles.filaEtiqueta}>Confirmar nueva contraseña</Text>
+              <TextInput
+                value={pwdConfirma}
+                onChangeText={setPwdConfirma}
+                placeholder="Repite la nueva contraseña"
+                placeholderTextColor="#A1887F"
+                secureTextEntry
+                style={styles.input}
+              />
+            </View>
+          </View>
+
+          <View style={styles.botonesEditar}>
+            <TouchableOpacity
+              style={[styles.botonSec, guardandoPwd && styles.botonDeshabilitado]}
+              onPress={cancelarCambioPwd}
+              disabled={guardandoPwd}>
+              <Text style={styles.botonSecTexto}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.botonPri, guardandoPwd && styles.botonDeshabilitado]}
+              onPress={guardarPwd}
+              disabled={guardandoPwd}>
+              {guardandoPwd ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botonPriTexto}>Cambiar contraseña</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      <ModalAviso
+        visible={aviso.visible}
+        titulo={aviso.titulo}
+        mensaje={aviso.mensaje}
+        tipo={aviso.tipo}
+        onCerrar={() => setAviso((prev) => ({ ...prev, visible: false }))}
+      />
+      <ModalAviso
+        visible={confirmSalir}
+        tipo="aviso"
+        titulo="Cerrar sesión"
+        mensaje="¿Seguro que quieres salir de tu cuenta?"
+        textoBoton="Salir"
+        onCerrar={confirmarSalir}
+        textoCancelar="Cancelar"
+        onCancelar={() => setConfirmSalir(false)}
+      />
     </ScrollView>
   );
 }
@@ -356,12 +628,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   botonPrimarioTexto: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  botonEditar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    marginBottom: 4,
+    borderWidth: 1.5,
+    borderColor: '#5D4037',
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  botonEditarTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
+  filaEditable: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0E6DA',
+  },
+  input: {
+    marginTop: 6,
+    backgroundColor: '#F5EDE3',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#3E2723',
+    fontSize: 15,
+  },
+  botonesEditar: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+  },
+  botonPri: {
+    flex: 1,
+    backgroundColor: '#5D4037',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  botonPriTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  botonSec: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#5D4037',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  botonSecTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
+  botonDeshabilitado: { opacity: 0.6 },
+  botonCambiarPwd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    borderWidth: 1.5,
+    borderColor: '#5D4037',
+    borderRadius: 12,
+    paddingVertical: 14,
+  },
+  botonCambiarPwdTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
   botonSalir: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 30,
+    marginTop: 12,
     borderWidth: 1.5,
     borderColor: '#B71C1C',
     borderRadius: 12,

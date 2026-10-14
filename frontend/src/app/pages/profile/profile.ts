@@ -1,33 +1,208 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
+import { PerfilService, PerfilWeb } from '../../services/perfil.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profile.html'
 })
 export class ProfileComponent implements OnInit {
-  usuario: any = null;
+  cargando = true;
+  perfil: PerfilWeb | null = null;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  editando = false;
+  nombre = '';
+  email = '';
+  telefono = '';
+  guardando = false;
+
+  cambiandoPwd = false;
+  pwdActual = '';
+  pwdNueva = '';
+  pwdConfirma = '';
+  guardandoPwd = false;
+
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private perfilService: PerfilService
+  ) {}
 
   ngOnInit(): void {
+    this.cargar();
+  }
+
+  cargar(): void {
+    const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
     const userJson = localStorage.getItem('user');
 
-    if (!userJson) {
+    if (!token && !refreshToken && !userJson) {
       this.router.navigate(['/login']);
       return;
     }
 
-    this.usuario = JSON.parse(userJson);
+    this.cargando = true;
+    this.perfilService.obtenerPerfil().subscribe({
+      next: (p) => {
+        this.perfil = p;
+        this.nombre = p.nombre;
+        this.email = p.email;
+        this.telefono = p.telefono ?? '';
+        this.cargando = false;
+      },
+      error: () => {
+        this.cargando = false;
+        Swal.fire({
+          icon: 'warning',
+          title: 'No se pudo cargar el perfil',
+          text: 'Verifica tu sesión e inténtalo de nuevo.',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    });
+  }
+
+  iniciarEdicion(): void {
+    if (!this.perfil) return;
+    this.editando = true;
+    this.nombre = this.perfil.nombre;
+    this.email = this.perfil.email;
+    this.telefono = this.perfil.telefono ?? '';
+  }
+
+  cancelarEdicion(): void {
+    this.editando = false;
+  }
+
+  guardar(): void {
+    if (!this.nombre.trim() || !this.email.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Nombre y correo son obligatorios.',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+
+    this.guardando = true;
+    this.perfilService.actualizarPerfil({
+      nombre: this.nombre.trim(),
+      email: this.email.trim().toLowerCase(),
+      telefono: this.telefono.trim() || null
+    }).subscribe({
+      next: (p) => {
+        this.perfil = p;
+        this.editando = false;
+        this.guardando = false;
+        // Actualizamos localStorage.user si existe (opcional, pero coherente)
+        const userJson = localStorage.getItem('user');
+        if (userJson) {
+          try {
+            const u = JSON.parse(userJson);
+            u.nombre = p.nombre;
+            u.email = p.email;
+            u.telefono = p.telefono;
+            localStorage.setItem('user', JSON.stringify(u));
+          } catch {}
+        }
+        Swal.fire({
+          icon: 'success',
+          title: 'Perfil actualizado',
+          text: 'Tu información se guardó correctamente.',
+          confirmButtonText: 'Entendido'
+        });
+      },
+      error: (err) => {
+        this.guardando = false;
+        const msg = err.error?.error ?? 'No se pudo actualizar el perfil.';
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: msg,
+          confirmButtonText: 'Entendido'
+        });
+      }
+    });
+  }
+
+  abrirPwd(): void {
+    this.cambiandoPwd = true;
+    this.pwdActual = '';
+    this.pwdNueva = '';
+    this.pwdConfirma = '';
+  }
+
+  cancelarPwd(): void {
+    this.cambiandoPwd = false;
+  }
+
+  guardarPwd(): void {
+    if (!this.pwdActual || !this.pwdNueva || !this.pwdConfirma) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Datos incompletos',
+        text: 'Completa todos los campos.',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+    if (this.pwdNueva.length < 6) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña inválida',
+        text: 'La nueva contraseña debe tener al menos 6 caracteres.',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+    if (this.pwdNueva !== this.pwdConfirma) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No coinciden',
+        text: 'La nueva contraseña y la confirmación no coinciden.',
+        confirmButtonText: 'Entendido'
+      });
+      return;
+    }
+
+    this.guardandoPwd = true;
+    this.perfilService.cambiarPassword({
+      password_actual: this.pwdActual,
+      password_nueva: this.pwdNueva
+    }).subscribe({
+      next: () => {
+        this.guardandoPwd = false;
+        this.cambiandoPwd = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Contraseña actualizada',
+          text: 'Tu contraseña se cambió correctamente.',
+          confirmButtonText: 'Entendido'
+        });
+      },
+      error: (err) => {
+        this.guardandoPwd = false;
+        const msg = err.error?.error ?? 'No se pudo cambiar la contraseña.';
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: msg,
+          confirmButtonText: 'Entendido'
+        });
+      }
+    });
   }
 
   cerrarSesion(): void {
     const refreshToken = localStorage.getItem('refreshToken');
-    // Revoca la sesión en el backend y limpia el almacenamiento local
     this.authService.cerrarSesion(refreshToken).subscribe({
       next: () => this.limpiar(),
       error: () => this.limpiar()
@@ -39,5 +214,27 @@ export class ProfileComponent implements OnInit {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
+  }
+
+  formatearFecha(f: string): string {
+    const d = new Date(f);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  etiquetaRol(r: string): string {
+    if (r === 'cliente') return 'Cliente';
+    if (r === 'empleado') return 'Empleado';
+    if (r === 'admin') return 'Administrador';
+    return r;
+  }
+
+  iniciales(n: string): string {
+    return (n ?? '')
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p.charAt(0).toUpperCase())
+      .join('') || 'MI';
   }
 }

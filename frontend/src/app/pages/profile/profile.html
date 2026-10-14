@@ -3,31 +3,105 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="card shadow border-0 rounded-4 p-4 p-md-5">
-          
+
           <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
             <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-4 border" style="width: 80px; height: 80px; border-color: var(--color-cobre) !important;">
-              <span class="fs-1">👤</span>
+              <span class="fs-1">{{ cargando || !perfil ? '👤' : iniciales(perfil.nombre) }}</span>
             </div>
             <div>
               <h2 class="fw-bold mb-0" style="color: var(--color-cobre);">Mi Perfil</h2>
               <p class="text-muted fs-5 mb-0">Información de tu cuenta</p>
             </div>
           </div>
-          
-          <form onsubmit="return false;" *ngIf="usuario">
-            
-            <div class="mb-4">
-              <label class="form-label fw-bold text-secondary">Correo / Usuario</label>
-              <input type="text" class="form-control rounded-3 bg-light text-muted" [value]="usuario.email || usuario.username || usuario.id" readonly disabled>
+
+          <div *ngIf="cargando" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+
+          <form onsubmit="return false;" *ngIf="!cargando && perfil">
+
+            <!-- Vista de lectura -->
+            <div *ngIf="!editando && !cambiandoPwd">
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Correo electrónico</label>
+                <input type="text" class="form-control rounded-3 bg-light text-muted" [value]="perfil.email" readonly disabled>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Nombre completo</label>
+                <h4 class="fw-bold text-dark mt-2">{{ perfil.nombre }}</h4>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Teléfono</label>
+                <p class="text-dark mt-1 mb-0">{{ perfil.telefono ? perfil.telefono : 'No registrado' }}</p>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Rol</label>
+                <span class="badge rounded-pill px-3 py-2" style="background-color: var(--color-cobre); color: #fff;">{{ etiquetaRol(perfil.rol) }}</span>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Miembro desde</label>
+                <p class="text-muted mt-1 mb-0">{{ formatearFecha(perfil.creado_en) }}</p>
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 justify-content-between border-top pt-4">
+                <button (click)="iniciarEdicion()" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Editar perfil</button>
+                <button (click)="abrirPwd()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">Cambiar contraseña</button>
+                <button (click)="cerrarSesion()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Cerrar Sesión</button>
+              </div>
             </div>
-            
-            <div class="mb-5">
-              <label class="form-label fw-bold text-secondary">Nombre Completo</label>
-              <h4 class="fw-bold text-dark mt-2">{{ usuario.nombre || usuario.name || 'Cliente Pistolet' }}</h4>
+
+            <!-- Edición de perfil -->
+            <div *ngIf="editando">
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Nombre completo</label>
+                <input type="text" class="form-control rounded-3" [(ngModel)]="nombre" name="nombre" maxlength="120" autocomplete="name">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Correo electrónico</label>
+                <input type="email" class="form-control rounded-3" [(ngModel)]="email" name="email" maxlength="160" autocomplete="email">
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Teléfono</label>
+                <input type="tel" class="form-control rounded-3" [(ngModel)]="telefono" name="telefono" maxlength="20" autocomplete="tel">
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 justify-content-end border-top pt-4">
+                <button type="button" (click)="cancelarEdicion()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" [disabled]="guardando">Cancelar</button>
+                <button type="button" (click)="guardar()" class="btn btn-primary rounded-pill px-4 fw-bold" style="background-color: var(--color-cobre); border: none;" [disabled]="guardando">
+                  {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+                </button>
+              </div>
             </div>
-            
-            <div class="text-end border-top pt-4">
-              <button (click)="cerrarSesion()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Cerrar Sesión</button>
+
+            <!-- Cambio de contraseña -->
+            <div *ngIf="cambiandoPwd">
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Contraseña actual</label>
+                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdActual" name="pwdActual" autocomplete="current-password">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold text-secondary">Nueva contraseña</label>
+                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdNueva" name="pwdNueva" minlength="6" autocomplete="new-password">
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Confirmar nueva contraseña</label>
+                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdConfirma" name="pwdConfirma" minlength="6" autocomplete="new-password">
+              </div>
+
+              <div class="d-flex flex-wrap gap-2 justify-content-end border-top pt-4">
+                <button type="button" (click)="cancelarPwd()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" [disabled]="guardandoPwd">Cancelar</button>
+                <button type="button" (click)="guardarPwd()" class="btn btn-primary rounded-pill px-4 fw-bold" style="background-color: var(--color-cobre); border: none;" [disabled]="guardandoPwd">
+                  {{ guardandoPwd ? 'Cambiando...' : 'Cambiar contraseña' }}
+                </button>
+              </div>
             </div>
 
           </form>

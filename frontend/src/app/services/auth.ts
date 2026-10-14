@@ -34,4 +34,17 @@ export class AuthService {
   cerrarSesion(refreshToken: string | null): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/logout`, { refreshToken });
   }
+
+  // Perfil del usuario autenticado
+  obtenerPerfil(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me`);
+  }
+
+  actualizarPerfil(datos: { nombre: string; email: string; telefono?: string | null }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/me`, datos);
+  }
+
+  cambiarPassword(datos: { password_actual: string; password_nueva: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/me/password`, datos);
+  }
 }

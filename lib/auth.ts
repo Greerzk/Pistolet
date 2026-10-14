@@ -88,8 +88,6 @@ export async function cerrarSesion() {
 
 export async function login(email: string, password: string): Promise<Sesion> {
   const { data } = await axios.post(`${API_URL}/api/login`, { email, password });
-  // Backend nuevo:  { accessToken, refreshToken, user }
-  // Backend viejo:  { user } (sin JWT todavía)
   if (!data.accessToken) {
     throw new Error('El backend debe regresar accessToken. Revisa /api/login.');
   }
@@ -103,8 +101,6 @@ export async function login(email: string, password: string): Promise<Sesion> {
 }
 
 // ---------- Registro público ----------
-// Crea una cuenta con rol 'cliente' (igual que la web). No inicia sesión:
-// la pantalla de registro manda al login cuando el backend responde 201.
 
 export async function registrarCliente(datos: {
   nombre: string;
@@ -175,5 +171,22 @@ api.interceptors.response.use(
 
 export async function obtenerPerfil(): Promise<Perfil> {
   const { data } = await api.get(API_ME);
+  return data;
+}
+
+export async function actualizarPerfil(datos: {
+  nombre: string;
+  email: string;
+  telefono?: string | null;
+}): Promise<Perfil> {
+  const { data } = await api.put(API_ME, datos);
+  return data;
+}
+
+export async function cambiarPassword(datos: {
+  password_actual: string;
+  password_nueva: string;
+}): Promise<{ ok: boolean }> {
+  const { data } = await api.put(`${API_ME}/password`, datos);
   return data;
 }
