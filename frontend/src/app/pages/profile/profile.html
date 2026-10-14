@@ -5,8 +5,9 @@
         <div class="card shadow border-0 rounded-4 p-4 p-md-5">
 
           <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-4 border" style="width: 80px; height: 80px; border-color: var(--color-cobre) !important;">
-              <span class="fs-1">{{ cargando || !perfil ? '👤' : iniciales(perfil.nombre) }}</span>
+            <div class="bg-light rounded-circle overflow-hidden d-flex align-items-center justify-content-center me-4 border" style="width: 80px; height: 80px; border-color: var(--color-cobre) !important;">
+              <img *ngIf="!cargando && perfil && perfil.avatar_url" [src]="perfil.avatar_url" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+              <span *ngIf="cargando || !perfil || !perfil.avatar_url" class="fs-1">{{ cargando || !perfil ? '👤' : iniciales(perfil.nombre) }}</span>
             </div>
             <div>
               <h2 class="fw-bold mb-0" style="color: var(--color-cobre);">Mi Perfil</h2>
@@ -22,6 +23,18 @@
 
             <!-- Vista de lectura -->
             <div *ngIf="!editando && !cambiandoPwd">
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary d-block">Foto de perfil</label>
+                <div class="d-flex flex-wrap gap-2">
+                  <label class="btn btn-outline-primary rounded-pill px-4 fw-bold mb-0" [class.disabled]="subiendoAvatar">
+                    {{ subiendoAvatar ? 'Subiendo...' : 'Cambiar foto' }}
+                    <input type="file" accept="image/*" class="d-none" (change)="cambiarFoto($event)" [disabled]="subiendoAvatar">
+                  </label>
+                  <button type="button" *ngIf="perfil.avatar_url" (click)="quitarFoto()" class="btn btn-outline-danger rounded-pill px-4 fw-bold" [disabled]="subiendoAvatar">Quitar foto</button>
+                </div>
+                <div class="form-text">Imagen cuadrada (hasta 1000×1000). JPG o PNG, máx. 5 MB.</div>
+              </div>
+
               <div class="mb-4">
                 <label class="form-label fw-bold text-secondary">Correo electrónico</label>
                 <input type="text" class="form-control rounded-3 bg-light text-muted" [value]="perfil.email" readonly disabled>

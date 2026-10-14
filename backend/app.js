@@ -10,6 +10,8 @@
 //    JWT_SECRET     secreto para firmar los JWT
 //    PORT           puerto (Render lo inyecta)
 //    CORS_ORIGIN    origen permitido para la web (por defecto "*")
+//    CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET
+//                   almacenamiento de las fotos de perfil (ver lib/cloudinary.js)
 // =====================================================================
 require('dotenv').config();
 const path = require('path');
@@ -76,6 +78,12 @@ app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 // Traduce los RAISE EXCEPTION de Postgres y demás errores a JSON legible
 app.use((err, _req, res, _next) => {
   console.error(err);
+
+  // Archivo de imagen demasiado grande (multer).
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ error: 'La imagen es demasiado grande.' });
+  }
+
   const msg = err?.message || 'Error interno del servidor';
   res.status(400).json({ error: msg });
 });

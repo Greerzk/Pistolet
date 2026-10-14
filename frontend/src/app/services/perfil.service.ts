@@ -13,6 +13,7 @@ export interface PerfilWeb {
   email: string;
   telefono: string | null;
   rol: string;
+  avatar_url: string | null;
   creado_en: string;
 }
 
@@ -36,5 +37,18 @@ export class PerfilService {
 
   eliminarCuenta(): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/me`);
+  }
+
+  // Sube (o reemplaza) la foto de perfil. El backend la guarda en Cloudinary.
+  // No fijamos Content-Type: el navegador pone el boundary del multipart.
+  subirAvatar(archivo: File): Observable<PerfilWeb> {
+    const datos = new FormData();
+    datos.append('imagen', archivo);
+    return this.http.post<PerfilWeb>(`${this.apiUrl}/me/avatar`, datos);
+  }
+
+  // Quita la foto de perfil (la borra también de Cloudinary).
+  eliminarAvatar(): Observable<PerfilWeb> {
+    return this.http.delete<PerfilWeb>(`${this.apiUrl}/me/avatar`);
   }
 }

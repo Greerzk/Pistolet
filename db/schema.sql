@@ -34,6 +34,8 @@ CREATE TABLE usuario (
     telefono        varchar(20),
     password_hash   varchar(255) NOT NULL,          -- bcrypt/argon2, NUNCA texto plano
     rol             rol_usuario  NOT NULL DEFAULT 'cliente',
+    avatar_url      text,                           -- foto de perfil (Cloudinary)
+    avatar_public_id text,                          -- id en Cloudinary (para borrarla)
     activo          boolean      NOT NULL DEFAULT true,
     creado_en       timestamptz  NOT NULL DEFAULT now(),
     actualizado_en  timestamptz  NOT NULL DEFAULT now()

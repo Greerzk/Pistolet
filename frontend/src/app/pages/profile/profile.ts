@@ -29,6 +29,7 @@ export class ProfileComponent implements OnInit {
   guardandoPwd = false;
 
   eliminando = false;
+  subiendoAvatar = false;
 
   constructor(
     private router: Router,
@@ -250,6 +251,100 @@ export class ProfileComponent implements OnInit {
             icon: 'error',
             title: 'Error',
             text: err.error?.error ?? 'No se pudo eliminar la cuenta.',
+            confirmButtonText: 'Entendido'
+          });
+        }
+      });
+    });
+  }
+
+  // Sube la foto elegida en el <input type="file"> y refresca el perfil.
+  cambiarFoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0];
+    if (!archivo) return;
+
+    if (!archivo.type.startsWith('image/')) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivo no válido',
+        text: 'Selecciona una imagen (JPG o PNG).',
+        confirmButtonText: 'Entendido'
+      });
+      input.value = '';
+      return;
+    }
+    if (archivo.size > 5 * 1024 * 1024) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Imagen muy pesada',
+        text: 'El tamaño máximo es 5 MB.',
+        confirmButtonText: 'Entendido'
+      });
+      input.value = '';
+      return;
+    }
+
+    this.subiendoAvatar = true;
+    this.perfilService.subirAvatar(archivo).subscribe({
+      next: (p) => {
+        this.perfil = p;
+        this.subiendoAvatar = false;
+        this.cdr.detectChanges();
+        Swal.fire({
+          icon: 'success',
+          title: 'Foto actualizada',
+          text: 'Tu foto de perfil se guardó correctamente.',
+          confirmButtonText: 'Entendido'
+        });
+      },
+      error: (err) => {
+        this.subiendoAvatar = false;
+        this.cdr.detectChanges();
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.error?.error ?? 'No se pudo subir la foto.',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    });
+    input.value = '';
+  }
+
+  quitarFoto(): void {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Quitar foto',
+      text: '¿Seguro que quieres quitar tu foto de perfil?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, quitar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then((r) => {
+      if (!r.isConfirmed) return;
+
+      this.subiendoAvatar = true;
+      this.cdr.detectChanges();
+      this.perfilService.eliminarAvatar().subscribe({
+        next: (p) => {
+          this.perfil = p;
+          this.subiendoAvatar = false;
+          this.cdr.detectChanges();
+          Swal.fire({
+            icon: 'success',
+            title: 'Foto eliminada',
+            text: 'Tu foto de perfil se quitó correctamente.',
+            confirmButtonText: 'Entendido'
+          });
+        },
+        error: (err) => {
+          this.subiendoAvatar = false;
+          this.cdr.detectChanges();
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.error?.error ?? 'No se pudo quitar la foto.',
             confirmButtonText: 'Entendido'
           });
         }

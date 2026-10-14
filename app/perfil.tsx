@@ -6,6 +6,8 @@
 //  si falla, se usan los de la sesión guardada.
 // =====================================================================
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
@@ -28,10 +30,12 @@ import {
   cargarSesion,
   cambiarPassword,
   cerrarSesion,
+  eliminarAvatar,
   eliminarCuenta,
   obtenerPerfil,
   Perfil,
   Sesion,
+  subirAvatar,
 } from '@/lib/auth';
 
 const ETIQUETA_ROL: Record<string, string> = {
@@ -115,6 +119,10 @@ export default function PerfilScreen() {
   const [eliminandoCuenta, setEliminandoCuenta] = useState(false);
   const [eliminado, setEliminado] = useState(false);
 
+  // Foto de perfil
+  const [subiendoAvatar, setSubiendoAvatar] = useState(false);
+  const [confirmQuitarFoto, setConfirmQuitarFoto] = useState(false);
+
   const mostrarAviso = (titulo: string, mensaje?: string, tipo: TipoAviso = 'info') => {
     setAviso({ visible: true, titulo, mensaje, tipo });
   };
@@ -191,6 +199,64 @@ export default function PerfilScreen() {
       mostrarAviso('Error', msg, 'error');
     } finally {
       setGuardandoPwd(false);
+    }
+  };
+
+  // ---- Foto de perfil ----
+  const elegirFoto = async () => {
+    if (subiendoAvatar) return;
+
+    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permiso.granted) {
+      mostrarAviso(
+        'Permiso necesario',
+        'Necesitamos acceso a tus fotos para cambiar la imagen de perfil.',
+        'aviso',
+      );
+      return;
+    }
+
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (resultado.canceled || !resultado.assets?.[0]) return;
+
+    const asset = resultado.assets[0];
+    setSubiendoAvatar(true);
+    try {
+      const actualizado = await subirAvatar({
+        uri: asset.uri,
+        fileName: asset.fileName ?? null,
+        mimeType: asset.mimeType ?? null,
+        file: (asset as any).file,
+      });
+      setPerfil(actualizado);
+      mostrarAviso('Foto actualizada', 'Tu foto de perfil se guardó correctamente.', 'exito');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error ?? 'No se pudo subir la foto.';
+      mostrarAviso('Error', msg, 'error');
+    } finally {
+      setSubiendoAvatar(false);
+    }
+  };
+
+  const confirmarQuitarFoto = async () => {
+    if (subiendoAvatar) return;
+    setSubiendoAvatar(true);
+    try {
+      const actualizado = await eliminarAvatar();
+      setPerfil(actualizado);
+      setConfirmQuitarFoto(false);
+      mostrarAviso('Foto eliminada', 'Tu foto de perfil se quitó correctamente.', 'exito');
+    } catch (err: any) {
+      setConfirmQuitarFoto(false);
+      const msg = err?.response?.data?.error ?? 'No se pudo quitar la foto.';
+      mostrarAviso('Error', msg, 'error');
+    } finally {
+      setSubiendoAvatar(false);
     }
   };
 
@@ -310,13 +376,47 @@ export default function PerfilScreen() {
       {/* Encabezado: avatar + nombre + rol */}
       <View style={styles.encabezado}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarTexto}>{inicialesDe(nombre)}</Text>
+          {perfil?.avatar_url ? (
+            <Image
+              source={{ uri: perfil.avatar_url }}
+              style={styles.avatarImagen}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <Text style={styles.avatarTexto}>{inicialesDe(nombre)}</Text>
+          )}
         </View>
         <Text style={styles.nombre}>{nombre}</Text>
         <View style={styles.chipRol}>
           <Ionicons name="shield-checkmark-outline" size={14} color="#5D4037" />
           <Text style={styles.chipRolTexto}>{ETIQUETA_ROL[rol] ?? rol}</Text>
         </View>
+
+        {perfil && !editando && !cambiandoPwd && (
+          <View style={styles.avatarBotones}>
+            <TouchableOpacity
+              style={styles.avatarBoton}
+              onPress={elegirFoto}
+              disabled={subiendoAvatar}>
+              <Ionicons name="camera-outline" size={16} color="#5D4037" />
+              <Text style={styles.avatarBotonTexto}>
+                {subiendoAvatar ? 'Subiendo…' : 'Cambiar foto'}
+              </Text>
+            </TouchableOpacity>
+            {perfil.avatar_url ? (
+              <TouchableOpacity
+                style={styles.avatarBoton}
+                onPress={() => setConfirmQuitarFoto(true)}
+                disabled={subiendoAvatar}>
+                <Ionicons name="trash-outline" size={16} color="#B71C1C" />
+                <Text style={[styles.avatarBotonTexto, styles.avatarBotonTextoPeligro]}>
+                  Quitar foto
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        )}
       </View>
 
       {/* Datos de la cuenta */}
@@ -547,6 +647,16 @@ export default function PerfilScreen() {
         textoBoton="Entendido"
         onCerrar={finalizarEliminacion}
       />
+      <ModalAviso
+        visible={confirmQuitarFoto}
+        tipo="aviso"
+        titulo="Quitar foto"
+        mensaje="¿Seguro que quieres quitar tu foto de perfil?"
+        textoBoton="Sí, quitar"
+        onCerrar={confirmarQuitarFoto}
+        textoCancelar="Cancelar"
+        onCancelar={() => setConfirmQuitarFoto(false)}
+      />
     </ScrollView>
   );
 }
@@ -608,8 +718,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#5D4037',
     marginBottom: 12,
+    overflow: 'hidden',
   },
+  avatarImagen: { width: '100%', height: '100%' },
   avatarTexto: { fontSize: 34, fontWeight: 'bold', color: '#5D4037' },
+  avatarBotones: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
+  avatarBoton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: '#E0D5C8',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: '#fff',
+  },
+  avatarBotonTexto: { color: '#5D4037', fontWeight: '600', fontSize: 13 },
+  avatarBotonTextoPeligro: { color: '#B71C1C' },
   nombre: { fontSize: 22, fontWeight: 'bold', color: '#3E2723', textAlign: 'center' },
   chipRol: {
     flexDirection: 'row',

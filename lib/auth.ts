@@ -11,7 +11,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-import { API_ME, API_REGISTER, API_TIMEOUT_MS, API_URL } from '@/constants/api';
+import { API_ME, API_ME_AVATAR, API_REGISTER, API_TIMEOUT_MS, API_URL } from '@/constants/api';
 
 const KEY_SESSION = 'pistolet.session';
 
@@ -28,6 +28,7 @@ export type Perfil = {
   email: string;
   telefono: string | null;
   rol: string;
+  avatar_url: string | null;
   creado_en: string;
 };
 
@@ -199,5 +200,42 @@ export async function cambiarPassword(datos: {
 // Elimina (da de baja) la cuenta del usuario autenticado.
 export async function eliminarCuenta(): Promise<{ ok: boolean }> {
   const { data } = await api.delete(API_ME);
+  return data;
+}
+
+// ---------- Foto de perfil ----------
+
+// `archivo` es el asset que devuelve expo-image-picker. En web trae un
+// File real; en iOS/Android hay que armar el objeto { uri, name, type }.
+export async function subirAvatar(archivo: {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+  file?: unknown;
+}): Promise<Perfil> {
+  const form = new FormData();
+
+  if (archivo.file) {
+    // Web: ya es un File listo para enviar.
+    form.append('imagen', archivo.file as Blob);
+  } else {
+    form.append('imagen', {
+      uri: archivo.uri,
+      name: archivo.fileName ?? `avatar-${Date.now()}.jpg`,
+      type: archivo.mimeType ?? 'image/jpeg',
+    } as unknown as Blob);
+  }
+
+  const { data } = await api.post(`${API_ME}/avatar`, form, {
+    // En nativo hay que fijar el Content-Type; en web lo pone el navegador
+    // (con el boundary correcto), así que no lo tocamos.
+    headers:
+      Platform.OS === 'web' ? undefined : { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function eliminarAvatar(): Promise<Perfil> {
+  const { data } = await api.delete(API_ME_AVATAR);
   return data;
 }

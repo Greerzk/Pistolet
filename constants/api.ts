@@ -30,6 +30,7 @@ export const API_LOGIN = `${API_URL}/api/login`;
 export const API_PEDIDOS = `${API_URL}/api/pedidos`;
 export const API_REGISTER = `${API_URL}/api/register`;
 export const API_ME = `${API_URL}/api/me`;
+export const API_ME_AVATAR = `${API_URL}/api/me/avatar`;
 
 // Ruta pública de imágenes de productos (web de la panadería)
 export const IMAGENES_PRODUCTOS = `${API_URL}/img/productos/pan`;

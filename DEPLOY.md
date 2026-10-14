@@ -121,6 +121,31 @@ Copia tus imágenes a `backend/public/img/productos/pan/` y súbelas al repo.
 Quedarán servidas automáticamente en
 `https://pistolet-api.onrender.com/img/productos/pan/<archivo>.jpg`.
 
+### Fotos de perfil (Cloudinary)
+
+Las **fotos de perfil** se guardan en **Cloudinary** (no en disco ni en la
+base de datos): en disco se perderían en cada redespliegue de Render, y en la
+base inflarían el almacenamiento. En Postgres solo se guardan `avatar_url` y
+`avatar_public_id`.
+
+Para activarlas (una sola vez):
+
+1. Crea una cuenta gratis en https://cloudinary.com
+2. En el **Dashboard** copia **Cloud name**, **API Key** y **API Secret**.
+3. En Render → tu servicio → **Environment** agrega:
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+
+   (En local, agrégalas a `backend/.env` — copia de `.env.example`).
+4. Si tu base **ya existía**, ejecuta `db/migracion_avatar.sql` en el SQL
+   Editor de Neon (agrega las columnas `avatar_url` y `avatar_public_id`).
+   Si creas la base desde cero con `db/schema.sql`, ya vienen incluidas.
+
+La imagen se recorta a **1000×1000** y el backend usa el campo `imagen`
+(multipart). Si las variables no están configuradas, los endpoints de la foto
+responden `503` y el resto de la API funciona con normalidad.
+
 ---
 
 ## 6. Verificar que todo responde
