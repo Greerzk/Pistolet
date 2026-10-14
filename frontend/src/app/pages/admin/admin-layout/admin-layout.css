@@ -1,3 +1,9 @@
+/* El panel admin es una capa fija a pantalla completa. IMPORTANTE:
+   al ser "position: fixed" genera su propio contexto de apilamiento, así que
+   los modales de Bootstrap (hijos de este panel) quedan atrapados dentro de él.
+   Si este z-index es menor que el del backdrop de Bootstrap (1050), el backdrop
+   tapa el modal y no se puede escribir ni cerrar nada. Por eso lo mantenemos por
+   encima del backdrop y del navbar de la tienda (1030). */
 .admin-wrapper {
   position: fixed;
   top: 0;
@@ -6,7 +12,7 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 10;
+  z-index: 1060;
   overflow: hidden;
   background-color: #f5f7fa;
 }

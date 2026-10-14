@@ -297,3 +297,15 @@ body {
 .swal2-container {
     z-index: 999999 !important;
 }
+
+/* El panel admin es una capa fija por encima del backdrop de Bootstrap, por lo
+   que el backdrop nativo queda oculto detrás de él. Para no perder el efecto de
+   "fondo oscurecido" cuando hay un modal abierto, pintamos el oscurecido dentro
+   del propio panel, justo debajo del modal (que usa z-index 1055). */
+body.modal-open .admin-wrapper::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+}
