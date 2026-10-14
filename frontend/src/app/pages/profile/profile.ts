@@ -57,12 +57,17 @@ export class ProfileComponent implements OnInit {
         this.telefono = p.telefono ?? '';
         this.cargando = false;
       },
-      error: () => {
+      error: (err) => {
         this.cargando = false;
+        // status 0 / TimeoutError = la API no respondió (p. ej.
+        // reiniciando en Render), no es un problema de sesión.
+        const sinRespuesta = err?.status === 0 || err?.name === 'TimeoutError';
         Swal.fire({
           icon: 'warning',
-          title: 'No se pudo cargar el perfil',
-          text: 'Verifica tu sesión e inténtalo de nuevo.',
+          title: sinRespuesta ? 'La API no responde' : 'No se pudo cargar el perfil',
+          text: sinRespuesta
+            ? 'El servidor tarda en responder. Inténtalo de nuevo en unos segundos.'
+            : 'Verifica tu sesión e inténtalo de nuevo.',
           confirmButtonText: 'Entendido'
         });
       }

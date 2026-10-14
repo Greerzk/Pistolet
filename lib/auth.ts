@@ -2,7 +2,7 @@
 //  PISTOLET · Sesión JWT + cliente axios autenticado
 //
 //  · 'guardarSesion' persiste tokens (SecureStore en iOS/Android,
-//    memoria en web por simplicidad).
+//    localStorage en web para que la sesión sobreviva recargas).
 //  · El interceptor agrega el access token a cada request.
 //  · Si el servidor responde 401, renueva el access token con el
 //    refresh token una sola vez y reintenta la request original.
@@ -32,24 +32,25 @@ export type Perfil = {
 };
 
 let cache: Sesion | null = null;
-const webMemory = new Map<string, string>();
 
 async function guardar(key: string, value: string) {
   if (Platform.OS === 'web') {
-    webMemory.set(key, value);
+    // En web la sesión vive en localStorage: sobrevive recargas
+    // (F5) y pestañas. SecureStore no existe en web.
+    localStorage.setItem(key, value);
     return;
   }
   await SecureStore.setItemAsync(key, value);
 }
 
 async function obtener(key: string): Promise<string | null> {
-  if (Platform.OS === 'web') return webMemory.get(key) ?? null;
+  if (Platform.OS === 'web') return localStorage.getItem(key);
   return SecureStore.getItemAsync(key);
 }
 
 async function borrar(key: string) {
   if (Platform.OS === 'web') {
-    webMemory.delete(key);
+    localStorage.removeItem(key);
     return;
   }
   await SecureStore.deleteItemAsync(key);

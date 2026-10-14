@@ -9,7 +9,7 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, throwError, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 function limpiarSesion(router: Router): void {
@@ -36,6 +36,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     : req;
 
   return next(peticion).pipe(
+    // Si la API no responde (p. ej. mientras Render reinicia el
+    // servicio tras un despliegue), no dejamos la petición colgada
+    // para siempre: a los 30 s el error llega al componente.
+    timeout(30000),
     catchError((err: HttpErrorResponse) => {
       // Solo intentamos renovar si fue 401, la ruta no es libre y hay refresh
       const refreshToken = localStorage.getItem('refreshToken');
