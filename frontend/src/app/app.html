@@ -1,0 +1,82 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+  <div class="container">
+    
+    <a class="navbar-brand d-flex align-items-center" routerLink="/">
+      <img src="img/PISTOLET 2.png" alt="Pistolet" width="65" height="65" class="rounded me-2">
+      <span class="fs-1">Pistolet</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/products" routerLinkActive="active">Productos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/about" routerLinkActive="active">Nosotros</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/contact" routerLinkActive="active">Contáctanos</a>
+        </li>
+      </ul>
+
+      <div class="d-flex gap-2 align-items-center">
+        
+        <ng-container *ngIf="!estaLogueado">
+          <a routerLink="/login" class="btn btn-outline-light btn-sm rounded-pill">Iniciar sesión</a>
+          <a routerLink="/register" class="btn btn-primary btn-sm rounded-pill" style="background-color: var(--color-cobre); border: none;">Registrarse</a>
+        </ng-container>
+
+        <ng-container *ngIf="estaLogueado">
+          
+          <a *ngIf="usuario?.rol !== 'cliente'" 
+             routerLink="/admin/dashboard" 
+             class="btn btn-outline-warning btn-sm rounded-pill px-3 border-light text-white">
+             Panel Admin
+          </a>
+
+          <a routerLink="/profile" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm" style="background-color: var(--color-cobre); border: none;">Mi Perfil</a>
+        </ng-container>
+
+      </div>
+    </div>
+    
+  </div>
+</nav>
+
+<main class="mt-0 pt-0 min-vh-100 d-flex flex-column bg-light"> 
+    <router-outlet></router-outlet>
+</main>
+
+<footer class="bg-dark py-4 mt-auto">
+  <div class="container">
+    <div class="row text-center text-md-start align-items-center">
+      
+      <div class="col-md-4 mb-3 text-white">
+        <h6 class="text-uppercase fw-bold" style="color: var(--color-cobre);">Contacto</h6>
+        <p class="mb-1">📍 Calle 21 No.219 Avs. 2 y 4, Córdoba, Ver.</p>
+        <p class="mb-0">☎ 272 212 0201</p>
+      </div>
+
+      <div class="col-md-4 mb-3 text-center text-white">
+        <h6 class="text-uppercase fw-bold" style="color: var(--color-cobre);">© 2026 Panadería Pistolet</h6>
+        <p class="small mb-0">Todos los derechos reservados</p>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <h6 class="text-uppercase fw-bold text-white" style="color: var(--color-cobre) !important;">Redes</h6>
+        <a href="#" class="text-white text-decoration-none me-2">Facebook</a>
+        <a href="#" class="text-white text-decoration-none">Instagram</a>
+        <br>
+        <a routerLink="/admin/login" class="text-white small text-decoration-none mt-1 d-inline-block">⚙️ Acceso Admin</a>
+      </div>
+      
+    </div>
+  </div>
+</footer>

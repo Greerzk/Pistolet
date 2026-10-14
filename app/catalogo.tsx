@@ -27,7 +27,7 @@ import {
     View,
 } from 'react-native';
 
-import { API_PRODUCTOS, IMAGENES_PRODUCTOS } from '@/constants/api';
+import { API_PRODUCTOS, API_TIMEOUT_MS, IMAGENES_PRODUCTOS } from '@/constants/api';
 import { carritoStore, useCarrito } from '@/lib/carrito';
 
 const PAGE_SIZE = 20;
@@ -80,7 +80,7 @@ export default function CatalogoTabsScreen() {
     try {
       const response = await axios.get(API_PRODUCTOS, {
         params: { q: term.trim(), page: nextPage, pageSize: PAGE_SIZE },
-        timeout: 15000,
+        timeout: API_TIMEOUT_MS,
       });
 
       // Si hay una búsqueda/página más nueva en vuelo, descartamos esta.

@@ -11,7 +11,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-import { API_URL } from '@/constants/api';
+import { API_TIMEOUT_MS, API_URL } from '@/constants/api';
 
 const KEY_SESSION = 'pistolet.session';
 
@@ -94,7 +94,7 @@ export async function login(email: string, password: string): Promise<Sesion> {
 
 // ---------- Axios autenticado ----------
 
-export const api = axios.create({ timeout: 15000 });
+export const api = axios.create({ timeout: API_TIMEOUT_MS });
 
 api.interceptors.request.use(
   async (config) => {

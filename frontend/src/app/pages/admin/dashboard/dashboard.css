@@ -1,0 +1,12 @@
+.d-flex {
+  margin-top: -3rem !important; /* Ajusta este valor para eliminar el hueco blanco */
+  min-height: calc(100vh - 56px); /* 56px es la altura estándar de la Navbar */
+}
+
+/* Mejora para que el sidebar se vea más profesional */
+.bg-dark {
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  z-index: 1000;
+}

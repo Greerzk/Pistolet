@@ -1,0 +1,39 @@
+<section class="py-5 pt-5 mt-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow border-0 rounded-4 p-4 p-md-5">
+          
+          <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-4 border" style="width: 80px; height: 80px; border-color: var(--color-cobre) !important;">
+              <span class="fs-1">👤</span>
+            </div>
+            <div>
+              <h2 class="fw-bold mb-0" style="color: var(--color-cobre);">Mi Perfil</h2>
+              <p class="text-muted fs-5 mb-0">Información de tu cuenta</p>
+            </div>
+          </div>
+          
+          <form onsubmit="return false;" *ngIf="usuario">
+            
+            <div class="mb-4">
+              <label class="form-label fw-bold text-secondary">Correo / Usuario</label>
+              <input type="text" class="form-control rounded-3 bg-light text-muted" [value]="usuario.email || usuario.username || usuario.id" readonly disabled>
+            </div>
+            
+            <div class="mb-5">
+              <label class="form-label fw-bold text-secondary">Nombre Completo</label>
+              <h4 class="fw-bold text-dark mt-2">{{ usuario.nombre || usuario.name || 'Cliente Pistolet' }}</h4>
+            </div>
+            
+            <div class="text-end border-top pt-4">
+              <button (click)="cerrarSesion()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Cerrar Sesión</button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

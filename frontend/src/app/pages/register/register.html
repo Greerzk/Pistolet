@@ -1,0 +1,47 @@
+<section class="py-5 pt-5 mt-5 d-flex align-items-center justify-content-center">
+  <div class="card shadow-sm rounded-4 border-0 p-4" style="max-width: 400px; width: 100%;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold">Crear Cuenta</h3>
+      <p class="text-muted">Únete a la familia Pistolet</p>
+    </div>
+    <form (ngSubmit)="registrar()">
+          
+          <div *ngIf="mensajeError" class="alert alert-danger py-2 small text-center rounded-pill">
+            {{ mensajeError }}
+          </div>
+
+          <div class="mb-3">
+            <label for="name" class="form-label fw-bold small">Nombre completo</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 rounded-start-3">👤</span>
+              <input type="text" name="nombre" [(ngModel)]="usuario.nombre" class="form-control border-start-0 rounded-end-3 py-2" placeholder="Tu nombre" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-bold small">Correo electrónico</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 rounded-start-3">📧</span>
+              <input type="email" name="email" [(ngModel)]="usuario.email" class="form-control border-start-0 rounded-end-3 py-2" placeholder="ejemplo@correo.com" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label fw-bold small">Contraseña</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 rounded-start-3">🔒</span>
+              <input type="password" name="password" [(ngModel)]="usuario.password" class="form-control border-start-0 rounded-end-3 py-2" placeholder="Crea una contraseña segura" required>
+            </div>
+          </div>
+
+          <div class="d-grid mb-4">
+            <button type="submit" class="btn btn-primary rounded-pill btn-lg" style="background-color: var(--color-cobre); border: none;">Registrarse</button>
+          </div>
+
+          <div class="text-center pt-3 border-top">
+            <p class="small text-muted mb-2">¿Ya tienes una cuenta?</p>
+            <a routerLink="/login" class="btn btn-outline-dark rounded-pill px-4">Inicia sesión aquí</a>
+          </div>
+        </form>
+  </div>
+</section>

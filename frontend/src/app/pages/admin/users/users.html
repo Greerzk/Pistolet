@@ -1,0 +1,165 @@
+<div>
+  <!-- Header de la sección -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">Gestión de Usuarios</h2>
+      <p class="text-muted small mb-0">Control de clientes, empleados y administradores</p>
+    </div>
+    <button class="btn btn-primary rounded-pill px-4 shadow-sm" (click)="prepararCrear()">
+      <i class="bi bi-person-plus me-1"></i> Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- Pestañas de separación (Clientes vs Admins) y Buscador -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+      <!-- Tabs Nav -->
+      <ul class="nav nav-pills gap-2 border-0">
+        <li class="nav-item">
+          <button (click)="tabActiva = 'todos'" 
+                  class="nav-link rounded-pill px-3 py-2 border" 
+                  [class.active]="tabActiva === 'todos'">
+            Todos <span class="badge bg-secondary-subtle text-dark rounded-circle ms-1">{{ usuarios.length }}</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button (click)="tabActiva = 'clientes'" 
+                  class="nav-link rounded-pill px-3 py-2 border" 
+                  [class.active]="tabActiva === 'clientes'">
+            Clientes <span class="badge bg-primary-subtle text-primary rounded-circle ms-1">{{ totalClientes }}</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button (click)="tabActiva = 'admins'" 
+                  class="nav-link rounded-pill px-3 py-2 border" 
+                  [class.active]="tabActiva === 'admins'">
+            Administradores & Empleados <span class="badge bg-purple-subtle text-primary rounded-circle ms-1">{{ totalAdmins }}</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Buscador -->
+      <div class="input-group shadow-sm rounded-pill overflow-hidden style-search" style="max-width: 320px;">
+        <span class="input-group-text bg-light border-0 ps-3">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" 
+               [(ngModel)]="terminoBusqueda" 
+               class="form-control bg-light border-0 py-2 pe-3" 
+               placeholder="Buscar usuario o correo...">
+      </div>
+    </div>
+
+    <!-- Tabla Estandarizada -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-secondary small text-uppercase">
+          <tr>
+            <th>Usuario / Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="cargando">
+            <td colspan="4" class="text-center py-5">
+              <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              <span class="text-muted">Cargando lista de usuarios...</span>
+            </td>
+          </tr>
+
+          <tr *ngIf="!cargando && usuariosFiltrados.length === 0">
+            <td colspan="4" class="text-center py-5 text-muted">
+              No se encontraron usuarios matching con los filtros de búsqueda.
+            </td>
+          </tr>
+
+          <tr *ngFor="let u of usuariosFiltrados">
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                <div class="avatar bg-secondary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                  {{ (u.nombre || 'U')[0] | uppercase }}
+                </div>
+                <div>
+                  <div class="fw-bold text-dark">{{ u.nombre }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="text-secondary">{{ u.email }}</td>
+            <td>
+              <span class="badge border rounded-pill px-3 py-1.5"
+                    [ngClass]="{
+                      'bg-purple-subtle text-primary border-primary-subtle': u.rol === 'admin',
+                      'bg-info-subtle text-info border-info-subtle': u.rol === 'empleado',
+                      'bg-secondary-subtle text-secondary border-secondary-subtle': u.rol !== 'admin' && u.rol !== 'empleado'
+                    }">
+                {{ (u.rol || 'cliente') | uppercase }}
+              </span>
+            </td>
+            <td class="text-center">
+              <div class="d-inline-flex gap-2">
+                <button (click)="prepararEditar(u)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                  <i class="bi bi-pencil me-1"></i> Editar
+                </button>
+                <button (click)="eliminar(u.id)" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                  <i class="bi bi-trash me-1"></i> Borrar
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Estandarizado de Usuario -->
+<div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-bottom px-4 pt-4 pb-3">
+        <h5 class="fw-bold mb-0 text-dark">
+          <i class="bi me-2" [ngClass]="esEdicion ? 'bi-pencil-square' : 'bi-person-plus'"></i>
+          {{ esEdicion ? 'Editar Usuario' : 'Registrar Nuevo Usuario' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="formUsuario" (submit)="guardarUsuario($event)">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Nombre Completo</label>
+            <input type="text" name="nombre" id="nombre" class="form-control rounded-3" required placeholder="Ej. Juan Pérez">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Correo Electrónico</label>
+            <input type="email" name="email" id="email" class="form-control rounded-3" required placeholder="juan@ejemplo.com">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Contraseña {{ esEdicion ? '(Opcional para conservar la actual)' : '' }}</label>
+            <input type="password" name="password" class="form-control rounded-3" [required]="!esEdicion" placeholder="******">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-bold">Rol del Usuario</label>
+            <select name="rol" id="rol" class="form-select rounded-3" required>
+              <option value="cliente">Cliente</option>
+              <option value="empleado">Empleado</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top px-4 py-3">
+          <button type="button" id="closeModal" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">
+            {{ esEdicion ? 'Actualizar Cambios' : 'Guardar Usuario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

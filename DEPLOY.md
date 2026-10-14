@@ -239,3 +239,45 @@ funciona sin tu PC y sin red local.
 - [ ] `CORS_ORIGIN` acotado a tu dominio web (cuando publiques la web).
 - [ ] Rate-limit activo en `/api/login` (ya configurado: 20 intentos / 15 min).
 - [ ] `password_hash` nunca se devuelve en las respuestas.
+
+---
+
+## 10. Web Angular (`frontend/`)
+
+La tienda/panel web es un proyecto **Angular** que vive en `frontend/` y consume
+**la misma API y la misma base de datos (Neon)** que la app móvil. Cualquier
+cambio en la base se refleja en ambas automáticamente.
+
+### Correr en local
+
+```powershell
+cd frontend
+npm install
+npm start        # abre http://localhost:4200
+```
+
+Por defecto apunta al backend en Render (`environment.ts`). Si quieres probar un
+backend local, edita `frontend/src/environments/environment.ts` y usa
+`http://localhost:3000/api` y `http://localhost:3000/img`.
+
+### Desplegar en Vercel (segundo proyecto)
+
+1. Vercel → **Add New… → Project** → importa el mismo repo
+   `Greerzk/Pistolet`.
+2. En **Root Directory** selecciona **`frontend`**.
+3. Framework: **Angular** (Vercel lo detecta). Build: `npm run build`
+   (definido en `frontend/vercel.json`, salida `dist/pistolet-frontend2/browser`).
+4. Deploy. Queda una URL tipo `https://pistolet-web.vercel.app`.
+5. (Opcional) En Render, ajusta `CORS_ORIGIN` al dominio de Vercel para
+   restringir el acceso.
+
+> El proyecto Vercel **raíz** sigue siendo la app Expo web
+> (`vercel.json` en la raíz). Este segundo proyecto solo sirve el Angular de
+> `frontend/`.
+
+### Notas
+
+- Los proveedores se eliminaron: el insumo guarda `proveedor` como **texto**.
+- Las imágenes de productos viven en el backend
+  (`/img/productos/pan/<archivo>`). En Render el disco es efímero: las imágenes
+  subidas desde el panel se pierden al redeploy (mover a Cloudinary/S3 luego).

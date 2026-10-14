@@ -1,0 +1,30 @@
+<section id="contact" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold display-5">¿Quieres saber más?</h2>
+      <div style="width: 80px; height: 3px; background: var(--color-cobre); margin: 0 auto;"></div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-8 bg-white p-4 rounded-4 shadow-sm">
+        <form onsubmit="return false;">
+          <div class="mb-3">
+            <label for="contactName" class="form-label fw-bold">Nombre</label>
+            <input type="text" class="form-control rounded-3" id="contactName" placeholder="Tu nombre" required>
+          </div>
+          <div class="mb-3">
+            <label for="contactEmail" class="form-label fw-bold">Correo</label>
+            <input type="email" class="form-control rounded-3" id="contactEmail" placeholder="tucorreo@ejemplo.com" required>
+          </div>
+          <div class="mb-3">
+            <label for="contactMessage" class="form-label fw-bold">Mensaje</label>
+            <textarea class="form-control rounded-3" id="contactMessage" rows="4" placeholder="¿En qué te podemos ayudar?" required></textarea>
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary rounded-pill px-4">Enviar mensaje</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

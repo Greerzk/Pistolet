@@ -1,0 +1,41 @@
+<section class="py-5 pt-5 mt-5">
+  <div class="container">
+    <div *ngIf="!cargando && producto" class="row gx-5 align-items-center">
+      
+      <div class="col-md-6 text-center mb-4 mb-md-0">
+        <img [src]="producto.imagen" 
+             (error)="onImagenError($event)"
+             [alt]="producto.nombre" 
+             class="img-fluid rounded-4 shadow img-elegant" 
+             style="height: 450px; width: 100%; object-fit: cover;">
+      </div>
+      
+      <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a routerLink="/products" style="color: var(--color-cobre);">Catálogo</a></li>
+            <li class="breadcrumb-item active">{{ producto.nombre }}</li>
+          </ol>
+        </nav>
+
+        <h2 class="display-5 fw-bold mb-2 text-dark">{{ producto.nombre }}</h2>
+        
+        <div class="d-flex align-items-center mb-4">
+          <h3 class="fw-bold mb-0 me-3" style="color: var(--color-cobre); font-size: 2.5rem;">
+            ${{ (+producto.precio).toFixed(2) }}
+          </h3>
+          <span class="badge border px-3 py-2 rounded-pill" [ngClass]="producto.stock > 0 ? 'bg-light text-dark' : 'bg-danger text-white'">
+            {{ producto.stock > 0 ? 'Disponible: ' + producto.stock + ' pzas' : 'Agotado' }}
+          </span>
+        </div>
+        
+        <p class="fs-5 text-muted mb-4 text-justify">{{ producto.descripcion }}</p>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+          <button class="btn btn-dark btn-lg rounded-pill px-5 fw-bold" [disabled]="producto.stock === 0">Añadir al carrito</button>
+          <a routerLink="/products" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Volver al catálogo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

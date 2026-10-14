@@ -36,15 +36,9 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Esta es la pestaña de "Explore" que ya tenías, 
-          puedes dejarla o renombrarla luego */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
-        }}
-      />
+      {/* Nota: la pestaña "explore" que estaba aquí era del template de Expo.
+          Vivía en app/(tabs)/explore.tsx, no en la raíz, por eso Expo Router
+          advertía: No route named "explore" exists in nested children. */}
 
       {/* Pantallas accesibles por router.push pero sin pestaña en la barra */}
       <Tabs.Screen name="carrito" options={{ href: null }} />

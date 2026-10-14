@@ -1,0 +1,299 @@
+/*FUENTES */
+@font-face {
+    font-family: 'PistoletFont';
+    src: url('/fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'MigaSoft'; 
+    src: url('/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+    font-weight: normal;
+}
+
+:root {
+  --color-cobre: #B67345;
+  --color-oscuro: #1A1817;
+  --color-crema: #F5F2ED;
+  --bs-primary: var(--color-cobre);
+  --bs-body-bg: var(--color-crema);
+  --bs-body-color: var(--color-oscuro);
+}
+
+/* CONFIGURACIÓN GENERAL */
+html, body {
+    background-color: var(--color-crema) !important;
+    color: var(--color-oscuro) !important;
+    font-family: 'MigaSoft', sans-serif !important;
+}
+
+/* HEADER / NAVBAR */
+.navbar, 
+.bg-dark.navbar, 
+.bg-light.navbar {
+    background-color: var(--color-oscuro) !important; 
+}
+
+.navbar-brand, .navbar-brand span {
+    font-family: 'PistoletFont', serif !important;
+    color: var(--color-cobre) !important;
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+.navbar .nav-link {
+    color: var(--color-crema) !important;
+    font-weight: 500;
+}
+
+/* FOOTER */
+footer, 
+.footer, 
+[class*="footer"], 
+footer.bg-dark, 
+footer.bg-light {
+    background-color: var(--color-oscuro) !important;
+    color: var(--color-crema) !important;
+    padding: 3rem 0;
+    margin-top: 4rem;
+    border-top: 5px solid var(--color-cobre);
+}
+
+footer h6 {
+    color: var(--color-cobre) !important;
+    font-family: 'PistoletFont', serif !important;
+    text-transform: uppercase;
+}
+
+footer a {
+    color: var(--color-crema) !important;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: var(--color-cobre) !important;
+}
+
+/* BOTONES Y COMPONENTES */
+.btn-primary {
+    background-color: var(--color-cobre) !important;
+    border-color: var(--color-oscuro) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-oscuro) !important;
+    border-color: var(--color-cobre) !important;
+}
+
+/* TABLAS */
+.table {
+    --bs-table-bg: #ffffff;
+    border-color: var(--color-cobre);
+}
+
+.table thead {
+    background-color: var(--color-oscuro) !important;
+    color: var(--color-crema) !important;
+}
+
+/* 7. TÍTULOS */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'PistoletFont', serif !important;
+    color: var(--color-oscuro) !important;
+    font-weight: 700;
+}
+
+.navbar .nav-link {
+    color: var(--color-crema) !important;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s ease;
+    padding: 0.5rem 1rem !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--color-cobre) !important;
+    transform: translateY(-2px);
+}
+
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--color-cobre);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar .nav-link:hover::after,
+.navbar .nav-link.active::after {
+    width: 70%;
+}
+
+.navbar .nav-link:active {
+    transform: scale(0.95);
+}
+
+#home .position-relative {
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+#home img.banner-full {
+    height: 100vh !important;
+    width: 100% !important;
+    object-fit: cover; /* Evita que la imagen se estire o se vea 'gelatinosa' */
+    object-position: center; /* Centra la imagen si se recorta en móviles */
+}
+
+/* Ajuste del overlay para que el texto siempre esté centrado */
+#home .bg-opacity-50 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#home .position-absolute {
+    /* Mantenemos el centrado pero empujamos el contenido hacia arriba */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    
+    /* Añadimos un espacio abajo para que el contenido suba.
+       Prueba entre 10vh y 15vh hasta que lo veas perfecto.
+    */
+    padding-bottom: 12vh !important; 
+}
+
+/* public/css/custom.css */
+
+/* 1. Fondo de la tarjeta y Borde Dorado/Cobre */
+#destacados .card {
+    background-color: var(--color-oscuro) !important; /* Color carbón */
+    border: 2px solid var(--color-cobre) !important; /* Borde dorado/cobre */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 2. Aseguramos que el cuerpo de la tarjeta sea transparente para ver el fondo carbón */
+#destacados .card-body {
+    background-color: transparent !important;
+}
+
+/* 3. Letras color crema */
+#destacados .card-title {
+    color: var(--color-crema) !important;
+    font-family: 'PistoletFont', serif !important; /* Usamos tu fuente de títulos */
+    margin-top: 10px;
+}
+
+/* 4. Efecto de elevación al pasar el mouse (opcional pero recomendado) */
+#destacados .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    border-color: var(--color-crema) !important; /* El borde brilla en crema al tocarlo */
+}
+
+/* 5. Estilo para la barra de desplazamiento horizontal (Scrollbar) */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-cobre);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--color-oscuro);
+}
+
+/* --- SECCIÓN NOSOTROS ELEGANTE --- */
+
+/* Ajuste general de texto para que sea ordenado y legible */
+.text-justify {
+    text-align: justify;
+    line-height: 1.8; /* Más espacio entre líneas para elegancia */
+}
+
+/* Contenedor tipo "Editorial" con borde lateral de cobre */
+.editorial-box {
+    padding: 2rem;
+    background-color: #ffffff; /* Blanco puro para resaltar sobre el crema */
+    border-left: 5px solid var(--color-cobre);
+    border-radius: 0 20px 20px 0;
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.05);
+}
+
+/* Bloque oscuro para Misión y Visión (Efecto Contraste) */
+.mission-vision-block {
+    background-color: var(--color-oscuro) !important;
+    color: var(--color-crema) !important;
+    padding: 4rem 2rem;
+    border-radius: 50px;
+    border: 1px solid var(--color-cobre);
+}
+
+.mission-vision-block h3 {
+    color: var(--color-cobre) !important;
+    border-bottom: 2px solid var(--color-cobre);
+    display: inline-block;
+    margin-bottom: 1.5rem;
+}
+
+/* Decoración para las imágenes */
+.img-elegant {
+    border: 8px solid #ffffff;
+    outline: 2px solid var(--color-cobre);
+    transition: all 0.5s ease;
+}
+
+.img-elegant:hover {
+    outline-offset: 10px;
+}
+
+/* Clase para el contenedor del título */
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem; /* Espacio antes de que empiece el contenido */
+}
+
+/* El adorno de cobre debajo del título */
+.title-divider {
+    width: 80px;
+    height: 3px;
+    background-color: var(--color-cobre);
+    margin: 10px auto 0; /* Centrado y con espacio arriba */
+    border-radius: 50px; /* Bordes suaves */
+}
+
+body {
+    /* Añadimos un espacio arriba igual a la altura de tu navbar 
+       Como tu logo es de 65px + padding, unos 90px suelen ser ideales */
+    padding-top: 90px; 
+}
+
+/* Ajuste opcional para que el banner full-screen 
+   siga viéndose perfecto con el menú fijo */
+#home .position-relative {
+    height: calc(100vh - 90px); 
+}
+
+.navbar.fixed-top {
+    /* Esto hace que lo que pase por debajo del menú se vea borroso, muy premium */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(26, 24, 23, 0.9) !important; /* Negro carbón con 90% de opacidad */
+}
+
+/* FORZAR QUE SWEETALERT2 APAREZCA SIEMPRE AL FRENTE */
+.swal2-container {
+    z-index: 999999 !important;
+}
