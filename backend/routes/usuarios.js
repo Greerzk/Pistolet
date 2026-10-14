@@ -55,9 +55,12 @@ router.post('/', auth(['admin']), async (req, res, next) => {
     }
 
     const hash = await bcrypt.hash(String(password), 10);
+    // OJO: 'rol' es del tipo ENUM rol_usuario. Sin el cast explícito,
+    // COALESCE($5, 'cliente') resuelve a text y PostgreSQL rechaza la
+    // asignación ("column rol is of type rol_usuario but expression is of type text").
     const { rows } = await db.query(
       `INSERT INTO usuario (nombre, email, telefono, password_hash, rol)
-       VALUES ($1, $2, $3, $4, COALESCE($5, 'cliente'))
+       VALUES ($1, $2, $3, $4, COALESCE($5::rol_usuario, 'cliente'::rol_usuario))
        RETURNING id, nombre, email, rol`,
       [nombre, email, telefono || null, hash, rol || null]
     );
