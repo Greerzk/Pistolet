@@ -26,7 +26,8 @@ router.post('/refresh', async (req, res, next) => {
          JOIN usuario u ON u.id = s.usuario_id
         WHERE s.token_hash = $1
           AND NOT s.revocada
-          AND s.expira_en > now()`,
+          AND s.expira_en > now()
+          AND u.activo`,
       [sha256(String(refreshToken ?? ''))]
     );
 
