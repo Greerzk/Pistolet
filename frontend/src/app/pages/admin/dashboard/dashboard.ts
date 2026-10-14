@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../services/admin';
 import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -31,9 +32,15 @@ export class AdminDashboardComponent implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al cargar la vista:', err);
+      error: () => {
         this.cargando = false;
+        // Sin logs en consola: el aviso se muestra en un modal.
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo cargar el reporte de inventario crítico.',
+          confirmButtonText: 'Entendido'
+        });
       }
     });
   }

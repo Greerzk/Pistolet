@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProductsService } from '../../services/products';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-products',
@@ -55,11 +56,17 @@ export class ProductsComponent implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (error: any) => {
-        console.error('Error:', error);
+      error: () => {
         this.catalogo = [];
         this.cargando = false;
         this.cdr.detectChanges();
+        // Sin logs en consola: el aviso se muestra en un modal.
+        Swal.fire({
+          icon: 'error',
+          title: 'Catálogo no disponible',
+          text: 'No pudimos cargar los productos. Revisa tu conexión e inténtalo de nuevo.',
+          confirmButtonText: 'Entendido'
+        });
       }
     });
   }

@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = (route, _state) => {
   const router = inject(Router);
   const userJson = localStorage.getItem('user');
 
@@ -10,20 +11,26 @@ export const authGuard: CanActivateFn = (route, state) => {
     const userRole = user.tipo_usuario || user.rol;
     const rolesEsperados = route.data['roles'] as Array<string>;
 
-    if (!rolesEsperados) {
+    if (!rolesEsperados || rolesEsperados.includes(userRole)) {
       return true;
     }
 
-    if (rolesEsperados.includes(userRole)) {
-      return true;
-    } else {
-      console.warn('Acceso denegado: Rol insuficiente');
-      router.navigate(['/']);
-      return false;
-    }
+    // Sin logs en consola: el aviso se muestra en un modal y luego redirigimos.
+    Swal.fire({
+      icon: 'warning',
+      title: 'Acceso restringido',
+      text: 'No tienes permisos para entrar a esta sección.',
+      confirmButtonText: 'Entendido'
+    });
+    return router.parseUrl('/');
   }
 
-  console.warn('No hay sesión: Redirigiendo al login');
-  router.navigate(['/login']);
-  return false;
+  // Sin sesión: avisamos con un modal antes de mandar al login.
+  Swal.fire({
+    icon: 'info',
+    title: 'Inicia sesión',
+    text: 'Debes iniciar sesión para continuar.',
+    confirmButtonText: 'Ir a iniciar sesión'
+  });
+  return router.parseUrl('/login');
 };

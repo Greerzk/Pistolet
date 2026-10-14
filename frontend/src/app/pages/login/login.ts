@@ -3,6 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-login',
@@ -41,7 +42,15 @@ export class LoginComponent {
         }
       },
       error: (err) => {
-        this.mensajeError = err.error?.error || err.error?.message || 'Error al iniciar sesión';
+        const mensaje = err.error?.error || err.error?.message || 'Error al iniciar sesión';
+        this.mensajeError = mensaje;
+        // Sin logs en consola: el aviso se muestra en un modal.
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo iniciar sesión',
+          text: mensaje,
+          confirmButtonText: 'Entendido'
+        });
       }
     });
   }

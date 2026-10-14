@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProductsService } from '../../services/products';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-product-detail',
@@ -64,10 +65,16 @@ export class ProductDetailComponent implements OnInit {
           this.cargando = false;
           this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error('Error al traer el pan:', err);
+        error: () => {
           this.cargando = false;
           this.cdr.detectChanges();
+          // Sin logs en consola: el aviso se muestra en un modal.
+          Swal.fire({
+            icon: 'error',
+            title: 'Producto no disponible',
+            text: 'No pudimos cargar este producto. Inténtalo de nuevo.',
+            confirmButtonText: 'Entendido'
+          });
         }
       });
     }
