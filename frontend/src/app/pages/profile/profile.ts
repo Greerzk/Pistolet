@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,7 +31,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private perfilService: PerfilService
+    private perfilService: PerfilService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -56,12 +57,15 @@ export class ProfileComponent implements OnInit {
         this.email = p.email;
         this.telefono = p.telefono ?? '';
         this.cargando = false;
+        // La app es zoneless: hay que avisar a Angular del cambio.
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.cargando = false;
         // status 0 / TimeoutError = la API no respondió (p. ej.
         // reiniciando en Render), no es un problema de sesión.
         const sinRespuesta = err?.status === 0 || err?.name === 'TimeoutError';
+        this.cdr.detectChanges();
         Swal.fire({
           icon: 'warning',
           title: sinRespuesta ? 'La API no responde' : 'No se pudo cargar el perfil',
@@ -118,6 +122,7 @@ export class ProfileComponent implements OnInit {
             localStorage.setItem('user', JSON.stringify(u));
           } catch {}
         }
+        this.cdr.detectChanges();
         Swal.fire({
           icon: 'success',
           title: 'Perfil actualizado',
@@ -128,6 +133,7 @@ export class ProfileComponent implements OnInit {
       error: (err) => {
         this.guardando = false;
         const msg = err.error?.error ?? 'No se pudo actualizar el perfil.';
+        this.cdr.detectChanges();
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -186,6 +192,7 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.guardandoPwd = false;
         this.cambiandoPwd = false;
+        this.cdr.detectChanges();
         Swal.fire({
           icon: 'success',
           title: 'Contraseña actualizada',
@@ -196,6 +203,7 @@ export class ProfileComponent implements OnInit {
       error: (err) => {
         this.guardandoPwd = false;
         const msg = err.error?.error ?? 'No se pudo cambiar la contraseña.';
+        this.cdr.detectChanges();
         Swal.fire({
           icon: 'error',
           title: 'Error',
