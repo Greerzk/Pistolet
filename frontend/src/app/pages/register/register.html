@@ -1,47 +1,51 @@
-<section class="py-5 pt-5 mt-5 d-flex align-items-center justify-content-center">
-  <div class="card shadow-sm rounded-4 border-0 p-4" style="max-width: 400px; width: 100%;">
-    <div class="text-center mb-4">
-      <h3 class="fw-bold">Crear Cuenta</h3>
-      <p class="text-muted">Únete a la familia Pistolet</p>
+<main class="auth-page">
+  <section class="auth-card auth-card-register" aria-labelledby="register-title">
+    <div class="auth-brand-mark" aria-hidden="true">
+      <svg lucideShieldCheck [size]="22"></svg>
     </div>
-    <form (ngSubmit)="registrar()">
-          
-          <div *ngIf="mensajeError" class="alert alert-danger py-2 small text-center rounded-pill">
-            {{ mensajeError }}
-          </div>
+    <div class="auth-heading">
+      <span class="auth-eyebrow">Pistolet</span>
+      <h1 id="register-title">Crea tu cuenta</h1>
+      <p>Únete a una comunidad que disfruta lo recién horneado.</p>
+    </div>
 
-          <div class="mb-3">
-            <label for="name" class="form-label fw-bold small">Nombre completo</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 rounded-start-3">👤</span>
-              <input type="text" name="nombre" [(ngModel)]="usuario.nombre" class="form-control border-start-0 rounded-end-3 py-2" placeholder="Tu nombre" required>
-            </div>
-          </div>
+    <form class="auth-form" (ngSubmit)="registrar()" #registerForm="ngForm">
+      <div *ngIf="mensajeError" class="auth-alert" role="alert">
+        {{ mensajeError }}
+      </div>
 
-          <div class="mb-3">
-            <label for="email" class="form-label fw-bold small">Correo electrónico</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 rounded-start-3">📧</span>
-              <input type="email" name="email" [(ngModel)]="usuario.email" class="form-control border-start-0 rounded-end-3 py-2" placeholder="ejemplo@correo.com" required>
-            </div>
-          </div>
+      <div class="auth-field">
+        <label for="register-name">Nombre completo</label>
+        <div class="auth-input-wrap">
+          <svg class="auth-input-icon" lucideUserRound [size]="18" aria-hidden="true"></svg>
+          <input id="register-name" type="text" name="nombre" [(ngModel)]="usuario.nombre" placeholder="Tu nombre" autocomplete="name" required>
+        </div>
+      </div>
 
-          <div class="mb-4">
-            <label for="password" class="form-label fw-bold small">Contraseña</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 rounded-start-3">🔒</span>
-              <input type="password" name="password" [(ngModel)]="usuario.password" class="form-control border-start-0 rounded-end-3 py-2" placeholder="Crea una contraseña segura" required>
-            </div>
-          </div>
+      <div class="auth-field">
+        <label for="register-email">Correo electrónico</label>
+        <div class="auth-input-wrap">
+          <svg class="auth-input-icon" lucideMail [size]="18" aria-hidden="true"></svg>
+          <input id="register-email" type="email" name="email" [(ngModel)]="usuario.email" placeholder="ejemplo@correo.com" autocomplete="email" required>
+        </div>
+      </div>
 
-          <div class="d-grid mb-4">
-            <button type="submit" class="btn btn-primary rounded-pill btn-lg" style="background-color: var(--color-cobre); border: none;">Registrarse</button>
-          </div>
+      <div class="auth-field">
+        <label for="register-password">Contraseña</label>
+        <div class="auth-input-wrap">
+          <svg class="auth-input-icon" lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
+          <input id="register-password" type="password" name="password" [(ngModel)]="usuario.password" placeholder="Crea una contraseña segura" autocomplete="new-password" minlength="8" required>
+        </div>
+        <span class="auth-help">Usa al menos 8 caracteres.</span>
+      </div>
 
-          <div class="text-center pt-3 border-top">
-            <p class="small text-muted mb-2">¿Ya tienes una cuenta?</p>
-            <a routerLink="/login" class="btn btn-outline-dark rounded-pill px-4">Inicia sesión aquí</a>
-          </div>
-        </form>
-  </div>
-</section>
+      <button class="auth-submit" type="submit" [disabled]="registerForm.invalid">
+        Registrarme
+        <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
+      </button>
+    </form>
+
+    <div class="auth-divider"><span>¿Ya tienes una cuenta?</span></div>
+    <a routerLink="/login" class="auth-secondary-action">Iniciar sesión</a>
+  </section>
+</main>

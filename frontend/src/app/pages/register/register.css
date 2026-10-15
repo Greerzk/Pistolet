@@ -1,0 +1,5 @@
+@import '../login/login.css';
+
+.auth-card-register { max-width: 470px; }
+.auth-help { color: #9b897c; font-size: .75rem; }
+:host-context(body.dark-mode) .auth-help { color: #c5afa0; }

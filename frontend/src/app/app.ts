@@ -12,28 +12,6 @@ import { CommonModule } from '@angular/common';
 export class AppComponent {
   title = 'pistolet-frontend2';
 
-  /** Tema activo: 'dark' (por defecto) o 'light'. */
-  tema: 'light' | 'dark' = 'dark';
-
-  constructor() {
-    if (typeof document !== 'undefined') {
-      const actual = document.documentElement.getAttribute('data-bs-theme');
-      this.tema = actual === 'light' ? 'light' : 'dark';
-    }
-  }
-
-  /** Alterna el tema claro/oscuro y lo persiste en localStorage. */
-  alternarTema(): void {
-    if (typeof document === 'undefined') return;
-    this.tema = this.tema === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-bs-theme', this.tema);
-    try {
-      localStorage.setItem('pistolet-theme', this.tema);
-    } catch {
-      // localStorage no disponible: el tema cambia solo en esta sesión.
-    }
-  }
-
   get estaLogueado(): boolean {
     return typeof window !== 'undefined' && localStorage.getItem('user') !== null;
   }

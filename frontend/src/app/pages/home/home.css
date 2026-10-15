@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-media {
+  min-height: clamp(32rem, 72vh, 48rem);
+  overflow: hidden;
+  background: #241613;
+}
+
+.banner-full {
+  height: clamp(32rem, 72vh, 48rem);
+  object-fit: cover;
+  object-position: center;
+  animation: heroZoom 14s ease-out both;
+}
+
+.hero-overlay {
+  background: linear-gradient(180deg, rgba(30, 17, 13, .28) 0%, rgba(30, 17, 13, .68) 100%);
+}
+
+.hero-content {
+  animation: heroReveal .9s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.hero-kicker,
+.section-eyebrow {
+  color: var(--ps-copper, #b66a43);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+
+.hero-kicker { color: #f4c6a4; margin-bottom: 1rem; }
+.hero h1 { max-width: 48rem; letter-spacing: -.04em; }
+.hero-copy { max-width: 34rem; opacity: .92; }
+.hero-cta { transition: transform .25s ease, box-shadow .25s ease; }
+.hero-cta:hover { transform: translateY(-3px); box-shadow: 0 1rem 2rem rgba(0,0,0,.2); }
+
+.section-heading { padding-inline: 1rem; }
+.section-heading h2 { margin-top: .65rem; color: var(--ps-brown, #5d4037); }
+.section-rule { width: 4rem; height: .2rem; margin: 1rem auto; border-radius: 999px; background: var(--ps-copper, #b66a43); }
+.section-intro { max-width: 34rem; }
+
+.product-card { transition: transform .3s ease, box-shadow .3s ease; }
+.product-card:hover { transform: translateY(-.5rem); box-shadow: 0 1rem 2rem rgba(93, 64, 55, .14) !important; }
+.product-card img { transition: transform .5s ease; }
+.product-card:hover img { transform: scale(1.06); }
+.product-card .card-body { padding: 1.15rem; }
+
+.community-section { border-top: 1px solid rgba(93, 64, 55, .08); }
+.community-section .d-inline-block { transition: transform .3s ease, box-shadow .3s ease; }
+.community-section .d-inline-block:hover { transform: translateY(-.35rem) rotate(1deg); box-shadow: 0 1rem 2rem rgba(93, 64, 55, .12); }
+
+@keyframes heroZoom { from { transform: scale(1.04); } to { transform: scale(1); } }
+@keyframes heroReveal { from { opacity: 0; transform: translateY(1.25rem); } to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 576px) {
+  .hero-media, .banner-full { min-height: 34rem; height: 34rem; }
+  .hero h1 { font-size: 2.7rem; }
+  .hero-copy { font-size: 1.1rem; }
+}

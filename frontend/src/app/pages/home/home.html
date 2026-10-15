@@ -1,23 +1,27 @@
-<header id="home" class="mt-0">
-  <div class="position-relative">
-    <img src="img/landing_pistolet.jpg" class="img-fluid w-100 banner-full" alt="Banner Pistolet">
-    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-dark bg-opacity-50 text-center">
-      <h1 class="display-4 text-white fw-bold">Panadería Pistolet</h1>
-      <p class="lead text-white fs-4">Desde 1997 endulzando tus momentos más especiales</p>
-      <a routerLink="/home" class="btn btn-primary btn-lg rounded-pill px-5">Explorar</a>
+<header id="home" class="hero mt-0">
+  <div class="hero-media position-relative">
+    <img src="img/landing_pistolet.jpg" class="img-fluid w-100 banner-full" alt="Pan recién horneado en Pistolet">
+    <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+    <div class="hero-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center px-3">
+      <span class="hero-kicker text-uppercase">Hecho con calma, compartido con gusto</span>
+      <h1 class="display-3 text-white fw-bold">Panadería Pistolet</h1>
+      <p class="hero-copy lead text-white">Desde 1997 endulzando tus momentos más especiales</p>
+      <a routerLink="/products" class="btn btn-primary btn-lg rounded-pill px-5 hero-cta">Descubrir el menú <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></a>
     </div>
   </div>
 </header>
 
 <section id="destacados" class="py-5">
   <div class="container-fluid px-0"> 
-    <div class="text-center mb-5">
+    <div class="section-heading text-center mb-5">
+      <span class="section-eyebrow text-uppercase">Favoritos de la casa</span>
       <h2 class="fw-bold display-5">Sabor que nos distingue</h2>
-      <div style="width: 80px; height: 3px; background: var(--color-cobre); margin: 0 auto;"></div>
+      <div class="section-rule" aria-hidden="true"></div>
+      <p class="section-intro text-muted mx-auto">Recetas que salen del horno cada día para acompañar tus mejores momentos.</p>
     </div>
 
     <div class="d-flex flex-row flex-nowrap overflow-auto pb-4 custom-scrollbar">
-      <div class="card flex-shrink-0 ms-3 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
+      <div class="card product-card flex-shrink-0 ms-3 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
         <div class="ratio ratio-4x3">
           <img src="img/Productos/pan/Conchas_1.jpg" class="object-fit-cover rounded-top-4" alt="Concha">
         </div>
@@ -25,7 +29,7 @@
           <h5 class="card-title fw-bold">Concha</h5>
         </div>
       </div>
-      <div class="card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
+      <div class="card product-card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
         <div class="ratio ratio-4x3">
           <img src="img/Productos/pan/Cuernitos_1.jpg" class="object-fit-cover rounded-top-4" alt="Cuernito">
         </div>
@@ -33,7 +37,7 @@
           <h5 class="card-title fw-bold">Cuernito</h5>
         </div>
       </div>
-      <div class="card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
+      <div class="card product-card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
         <div class="ratio ratio-4x3">
           <img src="img/Productos/pan/Donas_1.jpg" class="object-fit-cover rounded-top-4" alt="Dona">
         </div>
@@ -41,7 +45,7 @@
           <h5 class="card-title fw-bold">Dona</h5>
         </div>
       </div>
-      <div class="card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
+      <div class="card product-card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
         <div class="ratio ratio-4x3">
           <img src="img/Productos/pan/Piedra_1.png" class="object-fit-cover rounded-top-4" alt="Bollo">
         </div>
@@ -49,7 +53,7 @@
           <h5 class="card-title fw-bold">Bollo</h5>
         </div>
       </div>
-      <div class="card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
+      <div class="card product-card flex-shrink-0 me-3 shadow-sm rounded-4 border-0" style="min-width: 18rem;">
         <div class="ratio ratio-4x3">
           <img src="img/Productos/pan/Empanada_1.png" class="object-fit-cover rounded-top-4" alt="Empanada">
         </div>
@@ -61,7 +65,7 @@
   </div>
 </section>
 
-<section class="py-5 bg-white text-center shadow-sm">
+<section class="community-section py-5 bg-white text-center shadow-sm">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
