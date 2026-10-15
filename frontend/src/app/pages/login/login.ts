@@ -4,13 +4,39 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import Swal from 'sweetalert2';
-import { LucideMail, LucideLockKeyhole, LucideArrowRight, LucideShieldCheck } from '@lucide/angular';
+import {
+  LucideMail,
+  LucideLockKeyhole,
+  LucideArrowRight,
+  LucideShieldCheck,
+  LucideEye,
+  LucideEyeOff,
+  LucideWheat,
+  LucideCroissant,
+  LucideBadgeCheck,
+  LucideHeart
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule, LucideMail, LucideLockKeyhole, LucideArrowRight, LucideShieldCheck],
-  templateUrl: './login.html'
+  imports: [
+    RouterLink,
+    FormsModule,
+    CommonModule,
+    LucideMail,
+    LucideLockKeyhole,
+    LucideArrowRight,
+    LucideShieldCheck,
+    LucideEye,
+    LucideEyeOff,
+    LucideWheat,
+    LucideCroissant,
+    LucideBadgeCheck,
+    LucideHeart
+  ],
+  templateUrl: './login.html',
+  styleUrl: './login.css'
 })
 export class LoginComponent {
   credenciales = {
@@ -18,8 +44,14 @@ export class LoginComponent {
     password: ''
   };
   mensajeError = '';
+  mostrarPassword = false;
 
   constructor(private authService: AuthService, private router: Router) {}
+
+  /** Muestra u oculta la contraseña sin perder lo escrito. */
+  alternarPassword() {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
 
   entrar() {
     this.mensajeError = '';

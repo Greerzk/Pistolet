@@ -1,42 +1,71 @@
 <main class="auth-page">
-  <section class="auth-card" aria-labelledby="login-title">
-    <div class="auth-brand-mark" aria-hidden="true">
-      <svg lucideShieldCheck [size]="22"></svg>
-    </div>
-    <div class="auth-heading">
-      <span class="auth-eyebrow">Pistolet</span>
-      <h1 id="login-title">Bienvenido de vuelta</h1>
-      <p>Accede para continuar con tu experiencia.</p>
-    </div>
+  <section class="auth-shell" aria-labelledby="login-title">
 
-    <form class="auth-form" (ngSubmit)="entrar()" #loginForm="ngForm">
-      <div *ngIf="mensajeError" class="auth-alert" role="alert">
-        {{ mensajeError }}
+    <!-- Panel de marca (decorativo en escritorio) -->
+    <aside class="auth-aside" aria-hidden="true">
+      <div class="auth-aside-inner">
+        <span class="auth-aside-brand">
+          <svg lucideWheat [size]="26"></svg>
+          Pistolet
+        </span>
+        <h2 class="auth-aside-title">El sabor de lo recién horneado</h2>
+        <p class="auth-aside-copy">
+          Entra a tu cuenta y continúa disfrutando de los favoritos que salen del horno cada mañana.
+        </p>
+        <ul class="auth-aside-list">
+          <li><svg lucideCroissant [size]="18"></svg> Productos frescos del día</li>
+          <li><svg lucideBadgeCheck [size]="18"></svg> Tus pedidos, en un solo lugar</li>
+          <li><svg lucideHeart [size]="18"></svg> Hecho con amor desde 1997</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Formulario -->
+    <div class="auth-panel">
+      <div class="auth-brand-mark" aria-hidden="true">
+        <svg lucideShieldCheck [size]="22"></svg>
       </div>
 
-      <div class="auth-field">
-        <label for="login-email">Correo electrónico</label>
-        <div class="auth-input-wrap">
-          <svg class="auth-input-icon" lucideMail [size]="18" aria-hidden="true"></svg>
-          <input id="login-email" type="email" name="email" [(ngModel)]="credenciales.email" placeholder="ejemplo@correo.com" autocomplete="email" required>
+      <div class="auth-heading">
+        <span class="auth-eyebrow">Pistolet</span>
+        <h1 id="login-title">Bienvenido de vuelta</h1>
+        <p>Accede para continuar con tu experiencia.</p>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="entrar()" #loginForm="ngForm">
+        <div *ngIf="mensajeError" class="auth-alert" role="alert">
+          {{ mensajeError }}
         </div>
-      </div>
 
-      <div class="auth-field">
-        <label for="login-password">Contraseña</label>
-        <div class="auth-input-wrap">
-          <svg class="auth-input-icon" lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
-          <input id="login-password" type="password" name="password" [(ngModel)]="credenciales.password" placeholder="Tu contraseña" autocomplete="current-password" required>
+        <div class="auth-field">
+          <label for="login-email">Correo electrónico</label>
+          <div class="auth-input-wrap">
+            <svg class="auth-input-icon" lucideMail [size]="18" aria-hidden="true"></svg>
+            <input id="login-email" type="email" name="email" [(ngModel)]="credenciales.email" placeholder="ejemplo@correo.com" autocomplete="email" required>
+          </div>
         </div>
-      </div>
 
-      <button class="auth-submit" type="submit" [disabled]="loginForm.invalid">
-        Entrar
-        <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
-      </button>
-    </form>
+        <div class="auth-field">
+          <label for="login-password">Contraseña</label>
+          <div class="auth-input-wrap has-toggle">
+            <svg class="auth-input-icon" lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
+            <input id="login-password" [type]="mostrarPassword ? 'text' : 'password'" name="password" [(ngModel)]="credenciales.password" placeholder="Tu contraseña" autocomplete="current-password" required>
+            <button type="button" class="auth-toggle" (click)="alternarPassword()" [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="mostrarPassword">
+              <svg *ngIf="mostrarPassword" lucideEyeOff [size]="18" aria-hidden="true"></svg>
+              <svg *ngIf="!mostrarPassword" lucideEye [size]="18" aria-hidden="true"></svg>
+            </button>
+          </div>
+        </div>
 
-    <div class="auth-divider"><span>¿Primera vez aquí?</span></div>
-    <a routerLink="/register" class="auth-secondary-action">Crear una cuenta</a>
+        <button class="auth-submit" type="submit" [disabled]="loginForm.invalid">
+          Entrar
+          <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>¿Primera vez aquí?</span></div>
+      <a routerLink="/register" class="auth-secondary-action">Crear una cuenta</a>
+    </div>
+
   </section>
 </main>

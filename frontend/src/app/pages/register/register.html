@@ -1,51 +1,80 @@
 <main class="auth-page">
-  <section class="auth-card auth-card-register" aria-labelledby="register-title">
-    <div class="auth-brand-mark" aria-hidden="true">
-      <svg lucideShieldCheck [size]="22"></svg>
+  <section class="auth-shell" aria-labelledby="register-title">
+
+    <!-- Panel de marca (decorativo en escritorio) -->
+    <aside class="auth-aside" aria-hidden="true">
+      <div class="auth-aside-inner">
+        <span class="auth-aside-brand">
+          <svg lucideWheat [size]="26"></svg>
+          Pistolet
+        </span>
+        <h2 class="auth-aside-title">Únete a la familia Pistolet</h2>
+        <p class="auth-aside-copy">
+          Crea tu cuenta para guardar tus favoritos, seguir tus pedidos y no perderte ninguna promoción.
+        </p>
+        <ul class="auth-aside-list">
+          <li><svg lucideCroissant [size]="18"></svg> Recién salido del horno</li>
+          <li><svg lucideBadgeCheck [size]="18"></svg> Registro rápido y seguro</li>
+          <li><svg lucideHeart [size]="18"></svg> Promociones para la comunidad</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Formulario -->
+    <div class="auth-panel">
+      <div class="auth-brand-mark" aria-hidden="true">
+        <svg lucideShieldCheck [size]="22"></svg>
+      </div>
+
+      <div class="auth-heading">
+        <span class="auth-eyebrow">Pistolet</span>
+        <h1 id="register-title">Crea tu cuenta</h1>
+        <p>Toma menos de un minuto.</p>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="registrar()" #registerForm="ngForm">
+        <div *ngIf="mensajeError" class="auth-alert" role="alert">
+          {{ mensajeError }}
+        </div>
+
+        <div class="auth-field">
+          <label for="register-name">Nombre completo</label>
+          <div class="auth-input-wrap">
+            <svg class="auth-input-icon" lucideUserRound [size]="18" aria-hidden="true"></svg>
+            <input id="register-name" type="text" name="nombre" [(ngModel)]="usuario.nombre" placeholder="Tu nombre" autocomplete="name" required>
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="register-email">Correo electrónico</label>
+          <div class="auth-input-wrap">
+            <svg class="auth-input-icon" lucideMail [size]="18" aria-hidden="true"></svg>
+            <input id="register-email" type="email" name="email" [(ngModel)]="usuario.email" placeholder="ejemplo@correo.com" autocomplete="email" required>
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="register-password">Contraseña</label>
+          <div class="auth-input-wrap has-toggle">
+            <svg class="auth-input-icon" lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
+            <input id="register-password" [type]="mostrarPassword ? 'text' : 'password'" name="password" [(ngModel)]="usuario.password" placeholder="Crea una contraseña segura" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="auth-toggle" (click)="alternarPassword()" [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="mostrarPassword">
+              <svg *ngIf="mostrarPassword" lucideEyeOff [size]="18" aria-hidden="true"></svg>
+              <svg *ngIf="!mostrarPassword" lucideEye [size]="18" aria-hidden="true"></svg>
+            </button>
+          </div>
+          <span class="auth-help">Usa al menos 8 caracteres.</span>
+        </div>
+
+        <button class="auth-submit" type="submit" [disabled]="registerForm.invalid">
+          Registrarme
+          <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>¿Ya tienes una cuenta?</span></div>
+      <a routerLink="/login" class="auth-secondary-action">Iniciar sesión</a>
     </div>
-    <div class="auth-heading">
-      <span class="auth-eyebrow">Pistolet</span>
-      <h1 id="register-title">Crea tu cuenta</h1>
-      <p>Únete a una comunidad que disfruta lo recién horneado.</p>
-    </div>
 
-    <form class="auth-form" (ngSubmit)="registrar()" #registerForm="ngForm">
-      <div *ngIf="mensajeError" class="auth-alert" role="alert">
-        {{ mensajeError }}
-      </div>
-
-      <div class="auth-field">
-        <label for="register-name">Nombre completo</label>
-        <div class="auth-input-wrap">
-          <svg class="auth-input-icon" lucideUserRound [size]="18" aria-hidden="true"></svg>
-          <input id="register-name" type="text" name="nombre" [(ngModel)]="usuario.nombre" placeholder="Tu nombre" autocomplete="name" required>
-        </div>
-      </div>
-
-      <div class="auth-field">
-        <label for="register-email">Correo electrónico</label>
-        <div class="auth-input-wrap">
-          <svg class="auth-input-icon" lucideMail [size]="18" aria-hidden="true"></svg>
-          <input id="register-email" type="email" name="email" [(ngModel)]="usuario.email" placeholder="ejemplo@correo.com" autocomplete="email" required>
-        </div>
-      </div>
-
-      <div class="auth-field">
-        <label for="register-password">Contraseña</label>
-        <div class="auth-input-wrap">
-          <svg class="auth-input-icon" lucideLockKeyhole [size]="18" aria-hidden="true"></svg>
-          <input id="register-password" type="password" name="password" [(ngModel)]="usuario.password" placeholder="Crea una contraseña segura" autocomplete="new-password" minlength="8" required>
-        </div>
-        <span class="auth-help">Usa al menos 8 caracteres.</span>
-      </div>
-
-      <button class="auth-submit" type="submit" [disabled]="registerForm.invalid">
-        Registrarme
-        <svg lucideArrowRight [size]="18" aria-hidden="true"></svg>
-      </button>
-    </form>
-
-    <div class="auth-divider"><span>¿Ya tienes una cuenta?</span></div>
-    <a routerLink="/login" class="auth-secondary-action">Iniciar sesión</a>
   </section>
 </main>

@@ -4,13 +4,41 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import Swal from 'sweetalert2';
-import { LucideMail, LucideLockKeyhole, LucideUserRound, LucideArrowRight, LucideShieldCheck } from '@lucide/angular';
+import {
+  LucideMail,
+  LucideLockKeyhole,
+  LucideUserRound,
+  LucideArrowRight,
+  LucideShieldCheck,
+  LucideEye,
+  LucideEyeOff,
+  LucideWheat,
+  LucideCroissant,
+  LucideBadgeCheck,
+  LucideHeart
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule, LucideMail, LucideLockKeyhole, LucideUserRound, LucideArrowRight, LucideShieldCheck],
-  templateUrl: './register.html'
+  imports: [
+    RouterLink,
+    FormsModule,
+    CommonModule,
+    LucideMail,
+    LucideLockKeyhole,
+    LucideUserRound,
+    LucideArrowRight,
+    LucideShieldCheck,
+    LucideEye,
+    LucideEyeOff,
+    LucideWheat,
+    LucideCroissant,
+    LucideBadgeCheck,
+    LucideHeart
+  ],
+  templateUrl: './register.html',
+  styleUrl: './register.css'
 })
 export class RegisterComponent {
   usuario = {
@@ -19,8 +47,14 @@ export class RegisterComponent {
     password: ''
   };
   mensajeError = '';
+  mostrarPassword = false;
 
   constructor(private authService: AuthService, private router: Router) {}
+
+  /** Muestra u oculta la contraseña sin perder lo escrito. */
+  alternarPassword() {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
 
   registrar() {
     this.mensajeError = '';
@@ -35,11 +69,16 @@ export class RegisterComponent {
             ? 'Tu cuenta fue reactivada. Ya puedes iniciar sesión.'
             : 'Tu cuenta ha sido creada. Ya puedes iniciar sesión.',
           confirmButtonText: 'Ir a iniciar sesión'
-        }).then(() => this.router.navigate(['/login']));
+        }).then(() => {
+          this.router.navigate(['/login']);
+        });
       },
       error: (err) => {
-        const mensaje = err.error?.error || 'Hubo un error al registrar. Intenta con otro correo.';
+        const datos = err.error ?? {};
+        const mensaje = datos.error || datos.message || 'Error al registrar el usuario';
         this.mensajeError = mensaje;
+
+        // Sin logs en consola: el aviso se muestra en un modal.
         Swal.fire({
           icon: 'error',
           title: 'No se pudo crear la cuenta',
