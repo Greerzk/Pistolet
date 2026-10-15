@@ -44,15 +44,6 @@
           <a routerLink="/profile" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">Mi Perfil</a>
         </ng-container>
 
-        <!-- Cambio de tema claro / oscuro -->
-        <button type="button"
-                class="btn btn-sm theme-toggle rounded-circle"
-                (click)="alternarTema()"
-                [title]="tema === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
-                [attr.aria-label]="tema === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'">
-          <i class="bi" [ngClass]="tema === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'"></i>
-        </button>
-
       </div>
     </div>
 
