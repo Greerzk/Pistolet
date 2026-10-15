@@ -226,8 +226,6 @@ export class ProfileComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#B71C1C',
-      cancelButtonColor: '#8D6E63',
       reverseButtons: true
     }).then((r) => {
       if (!r.isConfirmed) return;

@@ -1,12 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="utf-8">
-  <title>PistoletFrontend2</title>
+  <title>Pistolet · Panadería desde 1997</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17110D">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Tema antes del primer pintado (evita el destello blanco). -->
+  <script>
+    (function () {
+      var tema = 'dark';
+      try {
+        var guardado = localStorage.getItem('pistolet-theme');
+        if (guardado === 'light' || guardado === 'dark') tema = guardado;
+      } catch (e) { /* localStorage no disponible */ }
+      document.documentElement.setAttribute('data-bs-theme', tema);
+      document.documentElement.style.backgroundColor = tema === 'dark' ? '#17110D' : '#F5EFE6';
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

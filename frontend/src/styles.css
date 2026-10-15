@@ -1,311 +1,466 @@
-/*FUENTES */
+/* =====================================================================
+   PISTOLET · Hoja de estilos global (tienda)
+   ---------------------------------------------------------------------
+   Todos los colores y la tipografía provienen de
+   styles/tokens.generated.css (generado desde design/tokens.json).
+   Regla: NO escribir colores literales aquí — usar var(--ps-*).
+   El tema (claro/oscuro) se controla con el atributo data-bs-theme
+   sobre <html>.
+   ===================================================================== */
+
+/* ---------- Fuentes de marca (variable fonts) ---------- */
 @font-face {
-    font-family: 'PistoletFont';
-    src: url('/fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
-    font-weight: bold;
+  font-family: 'PistoletFont'; /* Playfair Display · títulos */
+  src: url('/fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'MigaSoft'; 
-    src: url('/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
-    font-weight: normal;
+  font-family: 'MigaSoft'; /* Space Grotesk · texto */
+  src: url('/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
 }
 
+/* ---------- Compatibilidad con la paleta anterior ---------- */
 :root {
-  --color-cobre: #B67345;
-  --color-oscuro: #1A1817;
-  --color-crema: #F5F2ED;
-  --bs-primary: var(--color-cobre);
-  --bs-body-bg: var(--color-crema);
-  --bs-body-color: var(--color-oscuro);
+  /* Alias legado: algunas plantillas todavía usan var(--color-cobre). */
+  --color-cobre: var(--ps-accent);
 }
 
-/* CONFIGURACIÓN GENERAL */
-html, body {
-    background-color: var(--color-crema) !important;
-    color: var(--color-oscuro) !important;
-    font-family: 'MigaSoft', sans-serif !important;
+/* ---------- Base ---------- */
+html,
+body {
+  background-color: var(--ps-bg) !important;
+  color: var(--ps-text) !important;
+  font-family: 'MigaSoft', system-ui, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* HEADER / NAVBAR */
-.navbar, 
-.bg-dark.navbar, 
-.bg-light.navbar {
-    background-color: var(--color-oscuro) !important; 
+/* Espacio para la navbar fija (logo 65px + padding). */
+body {
+  padding-top: 90px;
 }
 
-.navbar-brand, .navbar-brand span {
-    font-family: 'PistoletFont', serif !important;
-    color: var(--color-cobre) !important;
-    font-weight: bold;
-    font-size: 1.8rem;
-}
-
-.navbar .nav-link {
-    color: var(--color-crema) !important;
-    font-weight: 500;
-}
-
-/* FOOTER */
-footer, 
-.footer, 
-[class*="footer"], 
-footer.bg-dark, 
-footer.bg-light {
-    background-color: var(--color-oscuro) !important;
-    color: var(--color-crema) !important;
-    padding: 3rem 0;
-    margin-top: 4rem;
-    border-top: 5px solid var(--color-cobre);
-}
-
-footer h6 {
-    color: var(--color-cobre) !important;
-    font-family: 'PistoletFont', serif !important;
-    text-transform: uppercase;
-}
-
-footer a {
-    color: var(--color-crema) !important;
-    text-decoration: none;
-}
-
-footer a:hover {
-    color: var(--color-cobre) !important;
-}
-
-/* BOTONES Y COMPONENTES */
-.btn-primary {
-    background-color: var(--color-cobre) !important;
-    border-color: var(--color-oscuro) !important;
-    color: white !important;
-}
-
-.btn-primary:hover {
-    background-color: var(--color-oscuro) !important;
-    border-color: var(--color-cobre) !important;
-}
-
-/* TABLAS */
-.table {
-    --bs-table-bg: #ffffff;
-    border-color: var(--color-cobre);
-}
-
-.table thead {
-    background-color: var(--color-oscuro) !important;
-    color: var(--color-crema) !important;
-}
-
-/* 7. TÍTULOS */
+/* ---------- Títulos ---------- */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'PistoletFont', serif !important;
-    color: var(--color-oscuro) !important;
-    font-weight: 700;
+  font-family: 'PistoletFont', Georgia, serif;
+  color: var(--ps-heading);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* ---------- HEADER / NAVBAR ---------- */
+.navbar,
+.bg-dark.navbar,
+.bg-light.navbar {
+  background-color: var(--ps-inverse-bg) !important;
+}
+
+.navbar-brand,
+.navbar-brand span {
+  font-family: 'PistoletFont', Georgia, serif;
+  color: var(--ps-accent) !important;
+  font-weight: 700;
+  font-size: 1.8rem;
 }
 
 .navbar .nav-link {
-    color: var(--color-crema) !important;
-    font-weight: 500;
-    position: relative;
-    transition: color 0.3s ease;
-    padding: 0.5rem 1rem !important;
+  color: var(--ps-inverse-text) !important;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
+  padding: 0.5rem 1rem !important;
 }
 
 .navbar .nav-link:hover,
 .navbar .nav-link.active {
-    color: var(--color-cobre) !important;
-    transform: translateY(-2px);
+  color: var(--ps-accent) !important;
+  transform: translateY(-2px);
 }
 
 .navbar .nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 50%;
-    background-color: var(--color-cobre);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: var(--ps-accent);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
 }
 
 .navbar .nav-link:hover::after,
 .navbar .nav-link.active::after {
-    width: 70%;
+  width: 70%;
 }
 
 .navbar .nav-link:active {
-    transform: scale(0.95);
-}
-
-#home .position-relative {
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-}
-
-#home img.banner-full {
-    height: 100vh !important;
-    width: 100% !important;
-    object-fit: cover; /* Evita que la imagen se estire o se vea 'gelatinosa' */
-    object-position: center; /* Centra la imagen si se recorta en móviles */
-}
-
-/* Ajuste del overlay para que el texto siempre esté centrado */
-#home .bg-opacity-50 {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-#home .position-absolute {
-    /* Mantenemos el centrado pero empujamos el contenido hacia arriba */
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    
-    /* Añadimos un espacio abajo para que el contenido suba.
-       Prueba entre 10vh y 15vh hasta que lo veas perfecto.
-    */
-    padding-bottom: 12vh !important; 
-}
-
-/* public/css/custom.css */
-
-/* 1. Fondo de la tarjeta y Borde Dorado/Cobre */
-#destacados .card {
-    background-color: var(--color-oscuro) !important; /* Color carbón */
-    border: 2px solid var(--color-cobre) !important; /* Borde dorado/cobre */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* 2. Aseguramos que el cuerpo de la tarjeta sea transparente para ver el fondo carbón */
-#destacados .card-body {
-    background-color: transparent !important;
-}
-
-/* 3. Letras color crema */
-#destacados .card-title {
-    color: var(--color-crema) !important;
-    font-family: 'PistoletFont', serif !important; /* Usamos tu fuente de títulos */
-    margin-top: 10px;
-}
-
-/* 4. Efecto de elevación al pasar el mouse (opcional pero recomendado) */
-#destacados .card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-    border-color: var(--color-crema) !important; /* El borde brilla en crema al tocarlo */
-}
-
-/* 5. Estilo para la barra de desplazamiento horizontal (Scrollbar) */
-.custom-scrollbar::-webkit-scrollbar {
-    height: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--color-cobre);
-    border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--color-oscuro);
-}
-
-/* --- SECCIÓN NOSOTROS ELEGANTE --- */
-
-/* Ajuste general de texto para que sea ordenado y legible */
-.text-justify {
-    text-align: justify;
-    line-height: 1.8; /* Más espacio entre líneas para elegancia */
-}
-
-/* Contenedor tipo "Editorial" con borde lateral de cobre */
-.editorial-box {
-    padding: 2rem;
-    background-color: #ffffff; /* Blanco puro para resaltar sobre el crema */
-    border-left: 5px solid var(--color-cobre);
-    border-radius: 0 20px 20px 0;
-    box-shadow: 10px 10px 30px rgba(0,0,0,0.05);
-}
-
-/* Bloque oscuro para Misión y Visión (Efecto Contraste) */
-.mission-vision-block {
-    background-color: var(--color-oscuro) !important;
-    color: var(--color-crema) !important;
-    padding: 4rem 2rem;
-    border-radius: 50px;
-    border: 1px solid var(--color-cobre);
-}
-
-.mission-vision-block h3 {
-    color: var(--color-cobre) !important;
-    border-bottom: 2px solid var(--color-cobre);
-    display: inline-block;
-    margin-bottom: 1.5rem;
-}
-
-/* Decoración para las imágenes */
-.img-elegant {
-    border: 8px solid #ffffff;
-    outline: 2px solid var(--color-cobre);
-    transition: all 0.5s ease;
-}
-
-.img-elegant:hover {
-    outline-offset: 10px;
-}
-
-/* Clase para el contenedor del título */
-.section-header {
-    text-align: center;
-    margin-bottom: 3rem; /* Espacio antes de que empiece el contenido */
-}
-
-/* El adorno de cobre debajo del título */
-.title-divider {
-    width: 80px;
-    height: 3px;
-    background-color: var(--color-cobre);
-    margin: 10px auto 0; /* Centrado y con espacio arriba */
-    border-radius: 50px; /* Bordes suaves */
-}
-
-body {
-    /* Añadimos un espacio arriba igual a la altura de tu navbar 
-       Como tu logo es de 65px + padding, unos 90px suelen ser ideales */
-    padding-top: 90px; 
-}
-
-/* Ajuste opcional para que el banner full-screen 
-   siga viéndose perfecto con el menú fijo */
-#home .position-relative {
-    height: calc(100vh - 90px); 
+  transform: scale(0.95);
 }
 
 .navbar.fixed-top {
-    /* Esto hace que lo que pase por debajo del menú se vea borroso, muy premium */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    background-color: rgba(26, 24, 23, 0.9) !important; /* Negro carbón con 90% de opacidad */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: color-mix(in srgb, var(--ps-inverse-bg) 90%, transparent) !important;
 }
 
-/* FORZAR QUE SWEETALERT2 APAREZCA SIEMPRE AL FRENTE */
-.swal2-container {
-    z-index: 999999 !important;
+/* Botón de cambio de tema (claro/oscuro). */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--ps-inverse-text) 35%, transparent);
+  background-color: transparent;
+  color: var(--ps-inverse-text);
+  transition: all 0.2s ease;
 }
 
-/* El panel admin es una capa fija por encima del backdrop de Bootstrap, por lo
-   que el backdrop nativo queda oculto detrás de él. Para no perder el efecto de
-   "fondo oscurecido" cuando hay un modal abierto, pintamos el oscurecido dentro
-   del propio panel, justo debajo del modal (que usa z-index 1055). */
+.theme-toggle:hover {
+  background-color: color-mix(in srgb, var(--ps-accent) 22%, transparent);
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+  background-color: var(--ps-inverse-bg) !important;
+  color: var(--ps-inverse-text) !important;
+  border-top: 5px solid var(--ps-accent);
+}
+
+footer h6 {
+  color: var(--ps-accent) !important;
+  font-family: 'PistoletFont', Georgia, serif;
+  text-transform: uppercase;
+}
+
+footer a {
+  color: var(--ps-inverse-text) !important;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--ps-accent) !important;
+}
+
+/* ---------- BOTONES ---------- */
+.btn-primary {
+  --bs-btn-bg: var(--ps-accent);
+  --bs-btn-border-color: var(--ps-accent);
+  --bs-btn-color: var(--ps-on-accent);
+  --bs-btn-hover-bg: var(--ps-accent-hover);
+  --bs-btn-hover-border-color: var(--ps-accent-hover);
+  --bs-btn-hover-color: var(--ps-on-accent);
+  --bs-btn-active-bg: var(--ps-accent-hover);
+  --bs-btn-active-border-color: var(--ps-accent-hover);
+  --bs-btn-active-color: var(--ps-on-accent);
+  --bs-btn-disabled-bg: var(--ps-accent);
+  --bs-btn-disabled-border-color: var(--ps-accent);
+  --bs-btn-disabled-color: var(--ps-on-accent);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--ps-accent);
+  --bs-btn-border-color: var(--ps-accent);
+  --bs-btn-hover-bg: var(--ps-accent);
+  --bs-btn-hover-border-color: var(--ps-accent);
+  --bs-btn-hover-color: var(--ps-on-accent);
+  --bs-btn-active-bg: var(--ps-accent);
+  --bs-btn-active-border-color: var(--ps-accent);
+  --bs-btn-active-color: var(--ps-on-accent);
+}
+
+.btn-outline-dark {
+  --bs-btn-color: var(--ps-text);
+  --bs-btn-border-color: var(--ps-border);
+  --bs-btn-hover-bg: var(--ps-accent);
+  --bs-btn-hover-border-color: var(--ps-accent);
+  --bs-btn-hover-color: var(--ps-on-accent);
+  --bs-btn-active-bg: var(--ps-accent);
+  --bs-btn-active-border-color: var(--ps-accent);
+  --bs-btn-active-color: var(--ps-on-accent);
+}
+
+/* ---------- TABLAS ---------- */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ps-text);
+  --bs-table-border-color: var(--ps-border);
+  border-color: var(--ps-border);
+}
+
+.table thead {
+  background-color: var(--ps-inverse-bg) !important;
+  color: var(--ps-inverse-text) !important;
+}
+
+/* =====================================================================
+   HOME · hero de pantalla completa
+   ===================================================================== */
+#home .position-relative {
+  height: calc(100vh - 90px);
+  width: 100%;
+  overflow: hidden;
+}
+
+#home img.banner-full {
+  height: calc(100vh - 90px) !important;
+  width: 100% !important;
+  object-fit: cover;
+  object-position: center;
+}
+
+#home .bg-opacity-50 {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#home .position-absolute {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding-bottom: 12vh !important;
+}
+
+/* =====================================================================
+   SECCIÓN DESTACADOS (tarjetas oscuras con borde dorado)
+   ===================================================================== */
+#destacados .card {
+  background-color: var(--ps-surface) !important;
+  border: 2px solid var(--ps-copper) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#destacados .card-body {
+  background-color: transparent !important;
+}
+
+#destacados .card-title {
+  color: var(--ps-inverse-text) !important;
+  font-family: 'PistoletFont', Georgia, serif;
+  margin-top: 10px;
+}
+
+#destacados .card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--ps-shadow-lg);
+  border-color: var(--ps-accent) !important;
+}
+
+/* ---------- Scrollbar horizontal ---------- */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ps-copper);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--ps-inverse-bg);
+}
+
+/* =====================================================================
+   SECCIÓN "NOSOTROS" (editorial)
+   ===================================================================== */
+.text-justify {
+  text-align: justify;
+  line-height: 1.8;
+}
+
+.editorial-box {
+  padding: 2rem;
+  background-color: var(--ps-surface);
+  border-left: 5px solid var(--ps-copper);
+  border-radius: 0 20px 20px 0;
+  box-shadow: var(--ps-shadow-md);
+}
+
+.mission-vision-block {
+  background-color: var(--ps-inverse-bg) !important;
+  color: var(--ps-inverse-text) !important;
+  padding: 4rem 2rem;
+  border-radius: 50px;
+  border: 1px solid var(--ps-copper);
+}
+
+.mission-vision-block h3 {
+  color: var(--ps-accent) !important;
+  border-bottom: 2px solid var(--ps-copper);
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.img-elegant {
+  border: 8px solid var(--ps-surface);
+  outline: 2px solid var(--ps-copper);
+  transition: all 0.5s ease;
+}
+
+.img-elegant:hover {
+  outline-offset: 10px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title-divider {
+  width: 80px;
+  height: 3px;
+  background-color: var(--ps-copper);
+  margin: 10px auto 0;
+  border-radius: 50px;
+}
+
+/* =====================================================================
+   ADMIN · El modal nativo de Bootstrap queda tras el panel fijo,
+   así que pintamos el oscurecido dentro del propio panel.
+   ===================================================================== */
 body.modal-open .admin-wrapper::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1050;
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in srgb, #000 50%, transparent);
+  z-index: 1050;
+}
+
+/* =====================================================================
+   PUENTE de utilidades Bootstrap → tokens
+   (así las plantillas con bg-white / text-dark / table-light siguen
+   funcionando tanto en tema claro como oscuro)
+   ===================================================================== */
+.bg-white {
+  background-color: var(--ps-surface) !important;
+}
+
+.text-dark {
+  color: var(--ps-text) !important;
+}
+
+.text-white {
+  color: var(--ps-inverse-text) !important;
+}
+
+.text-secondary {
+  color: var(--ps-text-muted) !important;
+}
+
+.text-muted {
+  color: var(--ps-text-muted) !important;
+}
+
+.border-light {
+  border-color: var(--ps-border) !important;
+}
+
+.table-light {
+  --bs-table-color: var(--ps-text) !important;
+  --bs-table-bg: var(--ps-surface-subtle) !important;
+  --bs-table-border-color: var(--ps-border) !important;
+}
+
+.form-control,
+.form-select {
+  background-color: var(--ps-surface);
+  color: var(--ps-text);
+  border-color: var(--ps-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--ps-surface);
+  color: var(--ps-text);
+  border-color: var(--ps-accent);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--ps-accent) 25%, transparent);
+}
+
+.form-control::placeholder {
+  color: var(--ps-text-muted);
+}
+
+.input-group-text {
+  background-color: var(--ps-surface);
+  color: var(--ps-text-muted);
+  border-color: var(--ps-border);
+}
+
+.card {
+  --bs-card-bg: var(--ps-surface);
+  --bs-card-color: var(--ps-text);
+  --bs-card-border-color: var(--ps-border);
+  --bs-card-cap-bg: var(--ps-surface-subtle);
+  --bs-card-cap-color: var(--ps-text);
+}
+
+.modal-content {
+  --bs-modal-bg: var(--ps-surface);
+  --bs-modal-color: var(--ps-text);
+  --bs-modal-border-color: var(--ps-border);
+}
+
+.list-group {
+  --bs-list-group-bg: var(--ps-surface);
+  --bs-list-group-color: var(--ps-text);
+  --bs-list-group-border-color: var(--ps-border);
+}
+
+/* =====================================================================
+   SWEETALERT2 · tema de marca (claro/oscuro)
+   ===================================================================== */
+.swal2-container {
+  z-index: 999999 !important;
+}
+
+.swal2-popup {
+  background-color: var(--ps-surface) !important;
+  color: var(--ps-text) !important;
+  border: 1px solid var(--ps-border) !important;
+  border-radius: var(--ps-radius-lg) !important;
+}
+
+.swal2-title {
+  color: var(--ps-heading) !important;
+  font-family: 'PistoletFont', Georgia, serif !important;
+}
+
+.swal2-html-container {
+  color: var(--ps-text) !important;
+}
+
+.swal2-confirm {
+  background-color: var(--ps-accent) !important;
+  color: var(--ps-on-accent) !important;
+}
+
+.swal2-confirm:focus {
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--ps-accent) 30%, transparent) !important;
+}
+
+.swal2-cancel {
+  background-color: var(--ps-text-muted) !important;
+  color: var(--ps-inverse-bg) !important;
+}
+
+.swal2-deny {
+  background-color: var(--ps-danger) !important;
+  color: #fff !important;
+}
+
+.swal2-styled:focus {
+  box-shadow: none !important;
+}
+
+.swal2-timer-progress-bar {
+  background: color-mix(in srgb, var(--ps-accent) 60%, transparent) !important;
 }
