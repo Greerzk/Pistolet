@@ -2,6 +2,17 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {
+  LucideMail,
+  LucidePhone,
+  LucideCalendarDays,
+  LucideShieldCheck,
+  LucideCamera,
+  LucidePencil,
+  LucideKeyRound,
+  LucideLogOut,
+  LucideCircleAlert
+} from '@lucide/angular';
 import { AuthService } from '../../services/auth';
 import { PerfilService, PerfilWeb } from '../../services/perfil.service';
 import Swal from 'sweetalert2';
@@ -9,8 +20,21 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './profile.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideMail,
+    LucidePhone,
+    LucideCalendarDays,
+    LucideShieldCheck,
+    LucideCamera,
+    LucidePencil,
+    LucideKeyRound,
+    LucideLogOut,
+    LucideCircleAlert
+  ],
+  templateUrl: './profile.html',
+  styleUrl: './profile.css'
 })
 export class ProfileComponent implements OnInit {
   cargando = true;
@@ -362,6 +386,8 @@ export class ProfileComponent implements OnInit {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    // Olvidamos el perfil cacheado para que el header vuelva a "Iniciar sesión".
+    this.perfilService.limpiar();
     this.router.navigate(['/login']);
   }
 

@@ -10,8 +10,9 @@
 // =====================================================================
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import { Image as ExpoImage } from 'expo-image';
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     ActivityIndicator,
@@ -29,7 +30,7 @@ import {
 
 import { API_PRODUCTOS, API_TIMEOUT_MS, IMAGENES_PRODUCTOS } from '@/constants/api';
 import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
-import { cargarSesion } from '@/lib/auth';
+import { cargarSesion, obtenerPerfil } from '@/lib/auth';
 import { carritoStore, useCarrito } from '@/lib/carrito';
 import { useTheme, type ThemeShadows } from '@/lib/theme';
 
@@ -49,6 +50,18 @@ type Producto = {
   imagen: string | null;
 };
 
+/** Iniciales del nombre para el círculo de perfil (fallback sin foto). */
+function inicialesDe(nombre: string): string {
+  return (
+    nombre
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((parte) => parte.charAt(0).toUpperCase())
+      .join('') || 'MI'
+  );
+}
+
 export default function CatalogoTabsScreen() {
   const router = useRouter();
   const { theme, shadows } = useTheme();
@@ -65,7 +78,12 @@ export default function CatalogoTabsScreen() {
   const [buscando, setBuscando] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [iniciales, setIniciales] = useState('MI');
+
+  // Avatar del header: nombre y foto. Se refrescan cada vez que esta
+  // pantalla vuelve a tener el foco (p. ej. al regresar de "Mi perfil").
+  const [nombrePerfil, setNombrePerfil] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const pidiendoAvatar = useRef(false);
 
   // Refs para evitar carreras: respuestas viejas, dobles "load more",
   // y para que los callbacks lean siempre el valor actual.
@@ -126,23 +144,35 @@ export default function CatalogoTabsScreen() {
     }
   }, []);
 
-  // Iniciales del usuario para el círculo de perfil de la cabecera.
-  useEffect(() => {
-    let activo = true;
-    cargarSesion().then((sesion) => {
-      if (!activo || !sesion?.user?.nombre) return;
-      const letras = sesion.user.nombre
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((parte) => parte.charAt(0).toUpperCase())
-        .join('');
-      setIniciales(letras || 'MI');
-    });
-    return () => {
-      activo = false;
-    };
+  // Foto de perfil del header. Primero pintamos lo que ya está en la
+  // sesión guardada (sin red) y después refrescamos con GET /api/me, así
+  // el círculo se actualiza solo al cambiar la foto.
+  const cargarAvatar = useCallback(async () => {
+    const sesion = await cargarSesion();
+    if (sesion?.user) {
+      setNombrePerfil(sesion.user.nombre);
+      setAvatarUrl(sesion.user.avatar_url ?? null);
+    }
+
+    if (pidiendoAvatar.current) return;
+    pidiendoAvatar.current = true;
+    try {
+      const perfil = await obtenerPerfil();
+      setNombrePerfil(perfil.nombre);
+      setAvatarUrl(perfil.avatar_url);
+    } catch {
+      // Sin perfil fresco seguimos mostrando lo guardado (o las iniciales).
+    } finally {
+      pidiendoAvatar.current = false;
+    }
   }, []);
+
+  // Recargamos al volver a esta pantalla (p. ej. desde "Mi perfil").
+  useFocusEffect(
+    useCallback(() => {
+      cargarAvatar();
+    }, [cargarAvatar]),
+  );
 
   // Carga inicial. Al desmontar se invalidan requests y el debounce.
   useEffect(() => {
@@ -228,7 +258,16 @@ export default function CatalogoTabsScreen() {
           <TouchableOpacity
             style={styles.profileCircle}
             onPress={() => router.push('/perfil')}>
-            <Text style={styles.profileText}>{iniciales}</Text>
+            {avatarUrl ? (
+              <ExpoImage
+                source={{ uri: avatarUrl }}
+                style={styles.profileImage}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Text style={styles.profileText}>{inicialesDe(nombrePerfil)}</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -352,7 +391,9 @@ function makeStyles(t: Theme, sh: ThemeShadows) {
       alignItems: 'center',
       borderWidth: 1,
       borderColor: t.copper,
+      overflow: 'hidden',
     },
+    profileImage: { width: '100%', height: '100%' },
     profileText: { color: t.heading, fontWeight: '700', fontSize: 16 },
     searchContainer: {
       flexDirection: 'row',

@@ -27,6 +27,7 @@ import { API_PEDIDOS } from '@/constants/api';
 import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
 import {
   actualizarPerfil,
+  actualizarUsuarioSesion,
   api,
   cargarSesion,
   cambiarPassword,
@@ -148,6 +149,13 @@ export default function PerfilScreen() {
     setEditando(true);
   };
 
+  // Guarda el perfil recién recibido y lo refleja en la sesión: así el
+  // círculo del header en el catálogo se actualiza al instante.
+  const aplicarPerfil = useCallback(async (p: Perfil) => {
+    setPerfil(p);
+    await actualizarUsuarioSesion({ nombre: p.nombre, avatar_url: p.avatar_url });
+  }, []);
+
   const cancelarEdicion = () => {
     setEditando(false);
     setGuardandoPerfil(false);
@@ -166,7 +174,7 @@ export default function PerfilScreen() {
         email: formEmail.trim().toLowerCase(),
         telefono: formTelefono.trim() || null,
       });
-      setPerfil(actualizado);
+      await aplicarPerfil(actualizado);
       setEditando(false);
       mostrarAviso('Perfil actualizado', 'Tu información se guardó correctamente.', 'exito');
     } catch (err: any) {
@@ -246,7 +254,7 @@ export default function PerfilScreen() {
         mimeType: asset.mimeType ?? null,
         file: (asset as any).file,
       });
-      setPerfil(actualizado);
+      await aplicarPerfil(actualizado);
       mostrarAviso('Foto actualizada', 'Tu foto de perfil se guardó correctamente.', 'exito');
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? 'No se pudo subir la foto.';
@@ -261,7 +269,7 @@ export default function PerfilScreen() {
     setSubiendoAvatar(true);
     try {
       const actualizado = await eliminarAvatar();
-      setPerfil(actualizado);
+      await aplicarPerfil(actualizado);
       setConfirmQuitarFoto(false);
       mostrarAviso('Foto eliminada', 'Tu foto de perfil se quitó correctamente.', 'exito');
     } catch (err: any) {
@@ -283,7 +291,7 @@ export default function PerfilScreen() {
     }
 
     try {
-      setPerfil(await obtenerPerfil());
+      await aplicarPerfil(await obtenerPerfil());
     } catch {
       // Sin perfil fresco: seguimos con los datos de la sesión guardada.
     }
@@ -296,7 +304,7 @@ export default function PerfilScreen() {
     }
 
     setCargando(false);
-  }, []);
+  }, [aplicarPerfil]);
 
   // Recargamos cada vez que la pantalla recibe el foco.
   useFocusEffect(

@@ -1,0 +1,395 @@
+/* =====================================================================
+   PISTOLET · Mi perfil
+   ---------------------------------------------------------------------
+   Diseño minimalista con SOLO tokens de marca (--ps-*), así el tema
+   claro/oscuro funciona automáticamente vía [data-bs-theme] en <html>.
+   ===================================================================== */
+
+:host {
+  display: block;
+}
+
+/* ---------- Lienzo ---------- */
+.ps-profile {
+  min-height: calc(100vh - 90px);
+  padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(3rem, 6vw, 5rem);
+}
+
+.ps-card {
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius-xl);
+  background: var(--ps-surface);
+  box-shadow: var(--ps-shadow-md);
+  animation: ps-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* =====================================================================
+   Cabecera: avatar + nombre + rol
+   ===================================================================== */
+.ps-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.ps-avatar {
+  position: relative;
+  width: 6.25rem;
+  height: 6.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.ps-avatar-frame {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 2px solid var(--ps-copper);
+  border-radius: 50%;
+  background: var(--ps-surface-subtle);
+  box-shadow: 0 0.6rem 1.4rem color-mix(in srgb, var(--ps-copper) 28%, transparent);
+}
+
+.ps-avatar-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ps-avatar-initials {
+  color: var(--ps-heading);
+  font-family: var(--ps-font-display, Georgia, serif);
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Botón-cámara sobre el avatar (dispara el input de archivo) */
+.ps-avatar-btn {
+  position: absolute;
+  right: -0.15rem;
+  bottom: -0.15rem;
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 2px solid var(--ps-surface);
+  border-radius: 50%;
+  background: var(--ps-accent);
+  color: var(--ps-on-accent);
+  cursor: pointer;
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ps-avatar-btn input {
+  display: none;
+}
+
+.ps-avatar-btn:hover {
+  background: var(--ps-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem color-mix(in srgb, var(--ps-accent) 35%, transparent);
+}
+
+.ps-avatar-btn--busy {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.ps-name {
+  margin: 0;
+  font-family: var(--ps-font-display);
+  font-size: clamp(1.45rem, 3vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ps-heading);
+  overflow-wrap: anywhere;
+}
+
+.ps-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--ps-accent) 35%, transparent);
+  border-radius: var(--ps-radius-pill);
+  background: color-mix(in srgb, var(--ps-accent) 12%, transparent);
+  color: var(--ps-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ps-hint {
+  margin: 0.35rem 0 0;
+  color: var(--ps-text-muted);
+  font-size: 0.8rem;
+}
+
+/* =====================================================================
+   Filas de información
+   ===================================================================== */
+.ps-body {
+  margin-top: 1.85rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--ps-border);
+}
+
+.ps-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ps-row {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.85rem 0;
+}
+
+.ps-row + .ps-row {
+  border-top: 1px solid color-mix(in srgb, var(--ps-border) 65%, transparent);
+}
+
+.ps-row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--ps-radius-md);
+  background: color-mix(in srgb, var(--ps-accent) 11%, transparent);
+  color: var(--ps-accent);
+}
+
+.ps-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.ps-row-label {
+  color: var(--ps-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.ps-row-value {
+  color: var(--ps-text);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================================
+   Botones
+   ===================================================================== */
+.ps-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.6rem;
+}
+
+.ps-actions-end {
+  justify-content: flex-end;
+}
+
+.ps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.68rem 1.15rem;
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius-pill);
+  background: transparent;
+  color: var(--ps-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ps-btn:hover:not(:disabled) {
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+  transform: translateY(-1px);
+}
+
+.ps-btn-primary {
+  border-color: var(--ps-accent);
+  background: var(--ps-accent);
+  color: var(--ps-on-accent);
+}
+
+.ps-btn-primary:hover:not(:disabled) {
+  border-color: var(--ps-accent-hover);
+  background: var(--ps-accent-hover);
+  color: var(--ps-on-accent);
+  box-shadow: 0 0.6rem 1.2rem color-mix(in srgb, var(--ps-accent) 30%, transparent);
+}
+
+.ps-btn-danger:hover:not(:disabled) {
+  border-color: var(--ps-danger);
+  color: var(--ps-danger);
+}
+
+.ps-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ---------- Enlace de texto (acciones destructivas) ---------- */
+.ps-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ps-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.ps-link:hover:not(:disabled) {
+  color: var(--ps-danger);
+}
+
+.ps-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ps-danger-zone {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--ps-border) 65%, transparent);
+}
+
+/* =====================================================================
+   Formularios (edición y contraseña)
+   ===================================================================== */
+.ps-section-title {
+  margin: 0 0 1.25rem;
+  font-family: var(--ps-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ps-heading);
+}
+
+.ps-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.05rem;
+}
+
+.ps-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ps-border);
+  border-radius: var(--ps-radius-md);
+  background: var(--ps-surface-subtle);
+  color: var(--ps-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.ps-input::placeholder {
+  color: var(--ps-text-muted);
+  opacity: 0.8;
+}
+
+.ps-input:focus {
+  outline: none;
+  border-color: var(--ps-accent);
+  background: var(--ps-surface);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--ps-accent) 22%, transparent);
+}
+
+/* =====================================================================
+   Cargando
+   ===================================================================== */
+.ps-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(3rem, 10vw, 6rem) 0;
+  color: var(--ps-text-muted);
+}
+
+.ps-loading p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.ps-spinner {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 3px solid var(--ps-border);
+  border-top-color: var(--ps-accent);
+  border-radius: 50%;
+  animation: ps-spin 0.8s linear infinite;
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes ps-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ps-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .ps-card {
+    padding: 1.6rem 1.25rem;
+    border-radius: var(--ps-radius-lg);
+  }
+
+  .ps-actions {
+    flex-direction: column;
+  }
+
+  .ps-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-card,
+  .ps-spinner {
+    animation: none;
+  }
+}

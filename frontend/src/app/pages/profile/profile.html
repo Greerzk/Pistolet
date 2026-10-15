@@ -1,132 +1,159 @@
-<section class="py-5 pt-5 mt-5">
+<section class="ps-profile">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow border-0 rounded-4 p-4 p-md-5">
 
-          <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-            <div class="bg-light rounded-circle overflow-hidden d-flex align-items-center justify-content-center me-4 border" style="width: 80px; height: 80px; border-color: var(--color-cobre) !important;">
-              <img *ngIf="!cargando && perfil && perfil.avatar_url" [src]="perfil.avatar_url" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
-              <span *ngIf="cargando || !perfil || !perfil.avatar_url" class="fs-1">{{ cargando || !perfil ? '👤' : iniciales(perfil.nombre) }}</span>
-            </div>
-            <div>
-              <h2 class="fw-bold mb-0" style="color: var(--color-cobre);">Mi Perfil</h2>
-              <p class="text-muted fs-5 mb-0">Información de tu cuenta</p>
-            </div>
+    <!-- Cargando -->
+    <div *ngIf="cargando" class="ps-loading">
+      <span class="ps-spinner" aria-hidden="true"></span>
+      <p>Cargando tu perfil…</p>
+    </div>
+
+    <form onsubmit="return false;" class="ps-card" *ngIf="!cargando && perfil">
+
+      <!-- ============ Cabecera: avatar, nombre y rol ============ -->
+      <header class="ps-hero">
+        <div class="ps-avatar">
+          <div class="ps-avatar-frame">
+            <img *ngIf="perfil.avatar_url" [src]="perfil.avatar_url || ''" alt="Foto de perfil">
+            <span *ngIf="!perfil.avatar_url" class="ps-avatar-initials">{{ iniciales(perfil.nombre) }}</span>
           </div>
 
-          <div *ngIf="cargando" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-          </div>
+          <label
+            *ngIf="!editando && !cambiandoPwd"
+            class="ps-avatar-btn"
+            [class.ps-avatar-btn--busy]="subiendoAvatar"
+            title="Cambiar foto">
+            <svg lucideCamera [size]="16" aria-hidden="true"></svg>
+            <span class="visually-hidden">Cambiar foto</span>
+            <input type="file" accept="image/*" (change)="cambiarFoto($event)" [disabled]="subiendoAvatar">
+          </label>
+        </div>
 
-          <form onsubmit="return false;" *ngIf="!cargando && perfil">
+        <h1 class="ps-name">{{ perfil.nombre }}</h1>
 
-            <!-- Vista de lectura -->
-            <div *ngIf="!editando && !cambiandoPwd">
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary d-block">Foto de perfil</label>
-                <div class="d-flex flex-wrap gap-2">
-                  <label class="btn btn-outline-primary rounded-pill px-4 fw-bold mb-0" [class.disabled]="subiendoAvatar">
-                    {{ subiendoAvatar ? 'Subiendo...' : 'Cambiar foto' }}
-                    <input type="file" accept="image/*" class="d-none" (change)="cambiarFoto($event)" [disabled]="subiendoAvatar">
-                  </label>
-                  <button type="button" *ngIf="perfil.avatar_url" (click)="quitarFoto()" class="btn btn-outline-danger rounded-pill px-4 fw-bold" [disabled]="subiendoAvatar">Quitar foto</button>
-                </div>
-                <div class="form-text">Imagen cuadrada (hasta 1000×1000). JPG o PNG, máx. 5 MB.</div>
-              </div>
+        <span class="ps-role">
+          <svg lucideShieldCheck [size]="15" aria-hidden="true"></svg>
+          {{ etiquetaRol(perfil.rol) }}
+        </span>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Correo electrónico</label>
-                <input type="text" class="form-control rounded-3 bg-light text-muted" [value]="perfil.email" readonly disabled>
-              </div>
+        <p class="ps-hint" *ngIf="subiendoAvatar">Subiendo tu foto…</p>
 
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Nombre completo</label>
-                <h4 class="fw-bold text-dark mt-2">{{ perfil.nombre }}</h4>
-              </div>
+        <button
+          type="button"
+          *ngIf="perfil.avatar_url && !subiendoAvatar && !editando && !cambiandoPwd"
+          class="ps-link"
+          (click)="quitarFoto()">
+          Quitar foto
+        </button>
+      </header>
 
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Teléfono</label>
-                <p class="text-dark mt-1 mb-0">{{ perfil.telefono ? perfil.telefono : 'No registrado' }}</p>
-              </div>
+      <!-- ==================== Vista de lectura ==================== -->
+      <div class="ps-body" *ngIf="!editando && !cambiandoPwd">
 
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Rol</label>
-                <span class="badge rounded-pill px-3 py-2" style="background-color: var(--ps-accent); color: var(--ps-on-accent);">{{ etiquetaRol(perfil.rol) }}</span>
-              </div>
+        <ul class="ps-rows">
+          <li class="ps-row">
+            <span class="ps-row-icon"><svg lucideMail [size]="18" aria-hidden="true"></svg></span>
+            <span class="ps-row-text">
+              <span class="ps-row-label">Correo</span>
+              <span class="ps-row-value">{{ perfil.email }}</span>
+            </span>
+          </li>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Miembro desde</label>
-                <p class="text-muted mt-1 mb-0">{{ formatearFecha(perfil.creado_en) }}</p>
-              </div>
+          <li class="ps-row">
+            <span class="ps-row-icon"><svg lucidePhone [size]="18" aria-hidden="true"></svg></span>
+            <span class="ps-row-text">
+              <span class="ps-row-label">Teléfono</span>
+              <span class="ps-row-value">{{ perfil.telefono ? perfil.telefono : 'No registrado' }}</span>
+            </span>
+          </li>
 
-              <div class="d-flex flex-wrap gap-2 justify-content-between border-top pt-4">
-                <button (click)="iniciarEdicion()" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Editar perfil</button>
-                <button (click)="abrirPwd()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">Cambiar contraseña</button>
-                <button (click)="cerrarSesion()" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Cerrar Sesión</button>
-              </div>
+          <li class="ps-row">
+            <span class="ps-row-icon"><svg lucideCalendarDays [size]="18" aria-hidden="true"></svg></span>
+            <span class="ps-row-text">
+              <span class="ps-row-label">Miembro desde</span>
+              <span class="ps-row-value">{{ formatearFecha(perfil.creado_en) }}</span>
+            </span>
+          </li>
+        </ul>
 
-              <div class="border-top mt-4 pt-4 text-center">
-                <button (click)="eliminarCuenta()" class="btn btn-link text-danger fw-bold text-decoration-none" [disabled]="eliminando">
-                  {{ eliminando ? 'Eliminando...' : 'Eliminar mi cuenta' }}
-                </button>
-              </div>
-            </div>
+        <div class="ps-actions">
+          <button type="button" class="ps-btn ps-btn-primary" (click)="iniciarEdicion()">
+            <svg lucidePencil [size]="17" aria-hidden="true"></svg>
+            Editar perfil
+          </button>
 
-            <!-- Edición de perfil -->
-            <div *ngIf="editando">
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Nombre completo</label>
-                <input type="text" class="form-control rounded-3" [(ngModel)]="nombre" name="nombre" maxlength="120" autocomplete="name">
-              </div>
+          <button type="button" class="ps-btn" (click)="abrirPwd()">
+            <svg lucideKeyRound [size]="17" aria-hidden="true"></svg>
+            Cambiar contraseña
+          </button>
 
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Correo electrónico</label>
-                <input type="email" class="form-control rounded-3" [(ngModel)]="email" name="email" maxlength="160" autocomplete="email">
-              </div>
+          <button type="button" class="ps-btn ps-btn-danger" (click)="cerrarSesion()">
+            <svg lucideLogOut [size]="17" aria-hidden="true"></svg>
+            Cerrar sesión
+          </button>
+        </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Teléfono</label>
-                <input type="tel" class="form-control rounded-3" [(ngModel)]="telefono" name="telefono" maxlength="20" autocomplete="tel">
-              </div>
-
-              <div class="d-flex flex-wrap gap-2 justify-content-end border-top pt-4">
-                <button type="button" (click)="cancelarEdicion()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" [disabled]="guardando">Cancelar</button>
-                <button type="button" (click)="guardar()" class="btn btn-primary rounded-pill px-4 fw-bold" style="background-color: var(--color-cobre); border: none;" [disabled]="guardando">
-                  {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Cambio de contraseña -->
-            <div *ngIf="cambiandoPwd">
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Contraseña actual</label>
-                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdActual" name="pwdActual" autocomplete="current-password">
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-bold text-secondary">Nueva contraseña</label>
-                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdNueva" name="pwdNueva" minlength="6" autocomplete="new-password">
-              </div>
-
-              <div class="mb-4">
-                <label class="form-label fw-bold text-secondary">Confirmar nueva contraseña</label>
-                <input type="password" class="form-control rounded-3" [(ngModel)]="pwdConfirma" name="pwdConfirma" minlength="6" autocomplete="new-password">
-              </div>
-
-              <div class="d-flex flex-wrap gap-2 justify-content-end border-top pt-4">
-                <button type="button" (click)="cancelarPwd()" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" [disabled]="guardandoPwd">Cancelar</button>
-                <button type="button" (click)="guardarPwd()" class="btn btn-primary rounded-pill px-4 fw-bold" style="background-color: var(--color-cobre); border: none;" [disabled]="guardandoPwd">
-                  {{ guardandoPwd ? 'Cambiando...' : 'Cambiar contraseña' }}
-                </button>
-              </div>
-            </div>
-
-          </form>
-
+        <div class="ps-danger-zone">
+          <button type="button" class="ps-link" (click)="eliminarCuenta()" [disabled]="eliminando">
+            <svg lucideCircleAlert [size]="15" aria-hidden="true"></svg>
+            {{ eliminando ? 'Eliminando…' : 'Eliminar mi cuenta' }}
+          </button>
         </div>
       </div>
-    </div>
+
+      <!-- ==================== Editar perfil ==================== -->
+      <div class="ps-body" *ngIf="editando">
+        <h2 class="ps-section-title">Editar mi información</h2>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="perfilNombre">Nombre completo</label>
+          <input id="perfilNombre" type="text" class="ps-input" [(ngModel)]="nombre" name="nombre" maxlength="120" autocomplete="name">
+        </div>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="perfilEmail">Correo electrónico</label>
+          <input id="perfilEmail" type="email" class="ps-input" [(ngModel)]="email" name="email" maxlength="160" autocomplete="email">
+        </div>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="perfilTelefono">Teléfono</label>
+          <input id="perfilTelefono" type="tel" class="ps-input" [(ngModel)]="telefono" name="telefono" maxlength="20" autocomplete="tel">
+        </div>
+
+        <div class="ps-actions ps-actions-end">
+          <button type="button" class="ps-btn" (click)="cancelarEdicion()" [disabled]="guardando">Cancelar</button>
+          <button type="button" class="ps-btn ps-btn-primary" (click)="guardar()" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= Cambio de contraseña ================= -->
+      <div class="ps-body" *ngIf="cambiandoPwd">
+        <h2 class="ps-section-title">Cambiar contraseña</h2>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="pwdActual">Contraseña actual</label>
+          <input id="pwdActual" type="password" class="ps-input" [(ngModel)]="pwdActual" name="pwdActual" autocomplete="current-password">
+        </div>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="pwdNueva">Nueva contraseña</label>
+          <input id="pwdNueva" type="password" class="ps-input" [(ngModel)]="pwdNueva" name="pwdNueva" minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="ps-field">
+          <label class="ps-row-label" for="pwdConfirma">Confirmar nueva contraseña</label>
+          <input id="pwdConfirma" type="password" class="ps-input" [(ngModel)]="pwdConfirma" name="pwdConfirma" minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="ps-actions ps-actions-end">
+          <button type="button" class="ps-btn" (click)="cancelarPwd()" [disabled]="guardandoPwd">Cancelar</button>
+          <button type="button" class="ps-btn ps-btn-primary" (click)="guardarPwd()" [disabled]="guardandoPwd">
+            {{ guardandoPwd ? 'Cambiando…' : 'Cambiar contraseña' }}
+          </button>
+        </div>
+      </div>
+
+    </form>
   </div>
 </section>

@@ -18,7 +18,7 @@ const KEY_SESSION = 'pistolet.session';
 export type Sesion = {
   accessToken: string;
   refreshToken: string;
-  user: { id: number; nombre: string; rol: string };
+  user: { id: number; nombre: string; rol: string; avatar_url?: string | null };
 };
 
 // Datos que regresa GET /api/me (pantalla de perfil).
@@ -79,6 +79,15 @@ export async function actualizarAccessToken(accessToken: string) {
   const actual = (await cargarSesion()) as Sesion | null;
   if (!actual) return;
   await guardarSesion({ ...actual, accessToken });
+}
+
+// Refresca los datos del usuario dentro de la sesión guardada (nombre y
+// foto de perfil). Lo llama la pantalla de perfil después de guardar, así
+// el círculo del header del catálogo se actualiza al instante.
+export async function actualizarUsuarioSesion(cambios: Partial<Sesion['user']>) {
+  const actual = await cargarSesion();
+  if (!actual) return;
+  await guardarSesion({ ...actual, user: { ...actual.user, ...cambios } });
 }
 
 export async function cerrarSesion() {

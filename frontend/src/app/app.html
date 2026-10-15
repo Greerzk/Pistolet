@@ -26,7 +26,7 @@
         </li>
       </ul>
 
-      <div class="d-flex gap-2 align-items-center">
+      <div class="d-flex gap-3 align-items-center">
 
         <ng-container *ngIf="!estaLogueado">
           <a routerLink="/login" class="btn btn-outline-light btn-sm rounded-pill">Iniciar sesión</a>
@@ -35,13 +35,17 @@
 
         <ng-container *ngIf="estaLogueado">
 
-          <a *ngIf="usuario?.rol !== 'cliente'"
+          <a *ngIf="usuario()?.rol !== 'cliente'"
              routerLink="/admin/dashboard"
              class="btn btn-outline-warning btn-sm rounded-pill px-3">
              Panel Admin
           </a>
 
-          <a routerLink="/profile" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">Mi Perfil</a>
+          <!-- Círculo de perfil: foto si existe, si no las iniciales -->
+          <a routerLink="/profile" class="ps-user" title="Mi perfil" aria-label="Mi perfil">
+            <img *ngIf="perfil()?.avatar_url" [src]="perfil()?.avatar_url || ''" alt="" class="ps-user-img">
+            <span *ngIf="!perfil()?.avatar_url" class="ps-user-initials">{{ iniciales }}</span>
+          </a>
         </ng-container>
 
       </div>
