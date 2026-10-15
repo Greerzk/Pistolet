@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import Swal from 'sweetalert2';
+import { LucideMail, LucideLockKeyhole, LucideArrowRight, LucideShieldCheck } from '@lucide/angular';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [RouterLink, FormsModule, CommonModule, LucideMail, LucideLockKeyhole, LucideArrowRight, LucideShieldCheck],
   templateUrl: './login.html'
 })
 export class LoginComponent {
