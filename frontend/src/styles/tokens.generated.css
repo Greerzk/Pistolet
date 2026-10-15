@@ -1,0 +1,191 @@
+/* =====================================================================
+ *  GENERADO desde design/tokens.json — NO EDITAR A MANO.
+ *  Edita los tokens y corre: node design/build-tokens.mjs
+ * ===================================================================== */
+
+:root {
+  --ps-coffee-500: #5D4037;
+  --ps-coffee-600: #3E2E22;
+  --ps-coffee-700: #2E2118;
+  --ps-coffee-800: #241A13;
+  --ps-coffee-850: #17110D;
+  --ps-coffee-900: #120C09;
+  --ps-cream-100: #F5E9D7;
+  --ps-cream-200: #EADCC6;
+  --ps-gold-400: #E0B65E;
+  --ps-gold-500: #C8963E;
+  --ps-gold-600: #A87B2E;
+  --ps-copper-500: #B67345;
+  --ps-white: #FFFFFF;
+  --ps-font-display: 'PlayfairDisplay', Georgia, serif;
+  --ps-font-body: 'SpaceGrotesk', system-ui, sans-serif;
+  --ps-text-xs: 12px;
+  --ps-text-sm: 14px;
+  --ps-text-md: 16px;
+  --ps-text-lg: 18px;
+  --ps-text-xl: 22px;
+  --ps-text-2xl: 28px;
+  --ps-text-3xl: 34px;
+  --ps-text-display: 44px;
+  --ps-weight-regular: 400;
+  --ps-weight-medium: 500;
+  --ps-weight-semibold: 600;
+  --ps-weight-bold: 700;
+  --ps-space-0: 0px;
+  --ps-space-1: 4px;
+  --ps-space-2: 8px;
+  --ps-space-3: 12px;
+  --ps-space-4: 16px;
+  --ps-space-5: 20px;
+  --ps-space-6: 24px;
+  --ps-space-8: 32px;
+  --ps-space-10: 40px;
+  --ps-space-12: 48px;
+  --ps-space-16: 64px;
+  --ps-radius-sm: 8px;
+  --ps-radius-md: 12px;
+  --ps-radius-lg: 16px;
+  --ps-radius-xl: 24px;
+  --ps-radius-pill: 999px;
+}
+
+:root,
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+  --ps-bg: #17110D;
+  --ps-surface: #241A13;
+  --ps-surface-subtle: #2E2118;
+  --ps-border: #3E2E22;
+  --ps-text: #F5E9D7;
+  --ps-text-muted: #B9A48C;
+  --ps-heading: #E0B65E;
+  --ps-accent: #C8963E;
+  --ps-accent-hover: #E0B65E;
+  --ps-on-accent: #241A13;
+  --ps-inverse-bg: #120C09;
+  --ps-inverse-text: #F5E9D7;
+  --ps-copper: #B67345;
+  --ps-focus-ring: #C8963E;
+  --ps-danger: #D9705F;
+  --ps-success: #7FA86A;
+  --ps-warning: #E0B65E;
+  --ps-info: #7FA9D6;
+  --ps-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --ps-shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --ps-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --bs-primary: var(--ps-accent);
+  --bs-primary-rgb: 200, 150, 62;
+  --bs-body-bg: var(--ps-bg);
+  --bs-body-bg-rgb: 23, 17, 13;
+  --bs-body-color: var(--ps-text);
+  --bs-body-color-rgb: 245, 233, 215;
+  --bs-emphasis-color: var(--ps-text);
+  --bs-emphasis-color-rgb: 245, 233, 215;
+  --bs-secondary-color: rgba(245, 233, 215, 0.7);
+  --bs-secondary-bg: var(--ps-surface-subtle);
+  --bs-secondary-bg-rgb: 46, 33, 24;
+  --bs-tertiary-color: rgba(245, 233, 215, 0.55);
+  --bs-tertiary-bg: var(--ps-surface);
+  --bs-border-color: var(--ps-border);
+  --bs-border-color-translucent: rgba(62, 46, 34, 0.65);
+  --bs-heading-color: var(--ps-heading);
+  --bs-link-color: var(--ps-accent);
+  --bs-link-color-rgb: 200, 150, 62;
+  --bs-link-hover-color: var(--ps-accent-hover);
+  --bs-link-hover-color-rgb: 224, 182, 94;
+  --bs-card-bg: var(--ps-surface);
+  --bs-card-color: var(--ps-text);
+  --bs-card-border-color: var(--ps-border);
+  --bs-card-cap-bg: var(--ps-surface-subtle);
+  --bs-dropdown-bg: var(--ps-surface);
+  --bs-dropdown-color: var(--ps-text);
+  --bs-dropdown-link-hover-bg: var(--ps-surface-subtle);
+  --bs-modal-bg: var(--ps-surface);
+  --bs-modal-color: var(--ps-text);
+  --bs-highlight-bg: var(--ps-accent);
+  --bs-highlight-color: var(--ps-on-accent);
+  --bs-dark: var(--ps-inverse-bg);
+  --bs-dark-rgb: 18, 12, 9;
+  --bs-light: var(--ps-surface-subtle);
+  --bs-light-rgb: 46, 33, 24;
+  --bs-danger: var(--ps-danger);
+  --bs-danger-rgb: 217, 112, 95;
+  --bs-success: var(--ps-success);
+  --bs-success-rgb: 127, 168, 106;
+  --bs-warning: var(--ps-warning);
+  --bs-warning-rgb: 224, 182, 94;
+  --bs-info: var(--ps-info);
+  --bs-info-rgb: 127, 169, 214;
+}
+
+[data-bs-theme="light"] {
+  color-scheme: light;
+  --ps-bg: #F5EFE6;
+  --ps-surface: #FFFBF5;
+  --ps-surface-subtle: #EFE6DA;
+  --ps-border: #DCCDB8;
+  --ps-text: #3E2723;
+  --ps-text-muted: #7A6558;
+  --ps-heading: #A87B2E;
+  --ps-accent: #B67345;
+  --ps-accent-hover: #1A120C;
+  --ps-on-accent: #FFFFFF;
+  --ps-inverse-bg: #17110D;
+  --ps-inverse-text: #F5E9D7;
+  --ps-copper: #B67345;
+  --ps-focus-ring: #B67345;
+  --ps-danger: #B3261E;
+  --ps-success: #3F7D4E;
+  --ps-warning: #B7791F;
+  --ps-info: #3A6EA5;
+  --ps-shadow-sm: 0 1px 3px rgba(26, 24, 23, 0.1);
+  --ps-shadow-md: 0 6px 20px rgba(26, 24, 23, 0.1);
+  --ps-shadow-lg: 0 12px 32px rgba(26, 24, 23, 0.16);
+  --bs-primary: var(--ps-accent);
+  --bs-primary-rgb: 182, 115, 69;
+  --bs-body-bg: var(--ps-bg);
+  --bs-body-bg-rgb: 245, 239, 230;
+  --bs-body-color: var(--ps-text);
+  --bs-body-color-rgb: 62, 39, 35;
+  --bs-emphasis-color: var(--ps-text);
+  --bs-emphasis-color-rgb: 62, 39, 35;
+  --bs-secondary-color: rgba(62, 39, 35, 0.7);
+  --bs-secondary-bg: var(--ps-surface-subtle);
+  --bs-secondary-bg-rgb: 239, 230, 218;
+  --bs-tertiary-color: rgba(62, 39, 35, 0.55);
+  --bs-tertiary-bg: var(--ps-surface);
+  --bs-border-color: var(--ps-border);
+  --bs-border-color-translucent: rgba(220, 205, 184, 0.65);
+  --bs-heading-color: var(--ps-heading);
+  --bs-link-color: var(--ps-accent);
+  --bs-link-color-rgb: 182, 115, 69;
+  --bs-link-hover-color: var(--ps-accent-hover);
+  --bs-link-hover-color-rgb: 26, 18, 12;
+  --bs-card-bg: var(--ps-surface);
+  --bs-card-color: var(--ps-text);
+  --bs-card-border-color: var(--ps-border);
+  --bs-card-cap-bg: var(--ps-surface-subtle);
+  --bs-dropdown-bg: var(--ps-surface);
+  --bs-dropdown-color: var(--ps-text);
+  --bs-dropdown-link-hover-bg: var(--ps-surface-subtle);
+  --bs-modal-bg: var(--ps-surface);
+  --bs-modal-color: var(--ps-text);
+  --bs-highlight-bg: var(--ps-accent);
+  --bs-highlight-color: var(--ps-on-accent);
+  --bs-dark: var(--ps-inverse-bg);
+  --bs-dark-rgb: 23, 17, 13;
+  --bs-light: var(--ps-surface-subtle);
+  --bs-light-rgb: 239, 230, 218;
+  --bs-danger: var(--ps-danger);
+  --bs-danger-rgb: 179, 38, 30;
+  --bs-success: var(--ps-success);
+  --bs-success-rgb: 63, 125, 78;
+  --bs-warning: var(--ps-warning);
+  --bs-warning-rgb: 183, 121, 31;
+  --bs-info: var(--ps-info);
+  --bs-info-rgb: 58, 110, 165;
+}
+
+.ps-shadow-sm { box-shadow: var(--ps-shadow-sm) !important; }
+.ps-shadow-md { box-shadow: var(--ps-shadow-md) !important; }
+.ps-shadow-lg { box-shadow: var(--ps-shadow-lg) !important; }
