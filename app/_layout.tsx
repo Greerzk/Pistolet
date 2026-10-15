@@ -1,51 +1,56 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-// 1. IMPORTACIÓN CORREGIDA
-import { FontAwesome5 } from '@expo/vector-icons';
-import type { ColorValue } from 'react-native';
+// =====================================================================
+//  PISTOLET · Layout raiz (Stack)
+//
+//  Antes aqui vivia un <Tabs> que competia con el grupo (tabs)/, lo que
+//  provocaba DOS barras y que el login cargara dentro de un tab.
+//  Ahora la raiz es un Stack y cada pantalla decide su chrome:
+//    · (tabs)/  → barra inferior (catalogo)
+//    · login, carrito, perfil, registro, estado-pedido → pantalla completa
+// =====================================================================
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
 
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome5>['name'];
-  // En SDK 57 el color de los iconos del tab llega como ColorValue.
-  color: ColorValue;
-}) {
-  return <FontAwesome5 size={24} style={{ marginBottom: -3 }} {...props} />;
-}
+import { ThemeProvider, useTheme } from '@/lib/theme';
 
-export default function TabLayout() {
+// Mantenemos el splash visible hasta que las fuentes de marca carguen.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+function Navegacion() {
+  const { theme, isDark } = useTheme();
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#5D4037', // Color café de Pistolet
-        tabBarInactiveTintColor: '#A1887F',
-        tabBarStyle: {
-          backgroundColor: '#FFFBF5',
-          borderTopWidth: 1,
-          borderTopColor: '#D7CCC8',
-          height: 60,
-          paddingBottom: 8,
-        },
-        headerShown: false, // Usamos nuestro propio header del catálogo
-      }}>
-      
-      <Tabs.Screen
-        name="catalogo"
-        options={{
-          title: 'Inicio',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.bg },
+          animation: 'slide_from_right',
         }}
       />
+    </>
+  );
+}
 
-      {/* Nota: la pestaña "explore" que estaba aquí era del template de Expo.
-          Vivía en app/(tabs)/explore.tsx, no en la raíz, por eso Expo Router
-          advertía: No route named "explore" exists in nested children. */}
+export default function RootLayout() {
+  const [fuentesListas, fuentesError] = useFonts({
+    PlayfairDisplay: require('../assets/fonts/PlayfairDisplay-VariableFont_wght.ttf'),
+    SpaceGrotesk: require('../assets/fonts/SpaceGrotesk-VariableFont_wght.ttf'),
+  });
 
-      {/* Pantallas accesibles por router.push pero sin pestaña en la barra */}
-      <Tabs.Screen name="carrito" options={{ href: null }} />
-      <Tabs.Screen name="estado-pedido" options={{ href: null }} />
-      <Tabs.Screen name="perfil" options={{ href: null }} />
-      <Tabs.Screen name="registro" options={{ href: null }} />
-      <Tabs.Screen name="modal" options={{ href: null }} />
-    </Tabs>
+  useEffect(() => {
+    // Ocultamos el splash cuando las fuentes están listas (o si fallan).
+    if (fuentesListas || fuentesError) SplashScreen.hideAsync().catch(() => {});
+  }, [fuentesListas, fuentesError]);
+
+  if (!fuentesListas && !fuentesError) return null;
+
+  return (
+    <ThemeProvider>
+      <Navegacion />
+    </ThemeProvider>
   );
 }

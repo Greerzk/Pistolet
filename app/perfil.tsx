@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -24,6 +24,7 @@ import {
 
 import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { API_PEDIDOS } from '@/constants/api';
+import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
 import {
   actualizarPerfil,
   api,
@@ -37,6 +38,7 @@ import {
   Sesion,
   subirAvatar,
 } from '@/lib/auth';
+import { alpha, useTheme, type ThemeShadows } from '@/lib/theme';
 
 const ETIQUETA_ROL: Record<string, string> = {
   cliente: 'Cliente',
@@ -53,14 +55,23 @@ const ETIQUETA_ESTADO: Record<string, string> = {
   cancelado: 'Cancelado',
 };
 
-const COLOR_ESTADO: Record<string, string> = {
-  pendiente: '#8D6E63',
-  confirmado: '#5D4037',
-  en_preparacion: '#C8963E',
-  listo: '#2E7D32',
-  entregado: '#2E7D32',
-  cancelado: '#B71C1C',
-};
+function colorEstado(estado: string, t: Theme): string {
+  switch (estado) {
+    case 'pendiente':
+      return t.textMuted;
+    case 'confirmado':
+      return t.copper;
+    case 'en_preparacion':
+      return t.accent;
+    case 'listo':
+    case 'entregado':
+      return t.success;
+    case 'cancelado':
+      return t.danger;
+    default:
+      return t.text;
+  }
+}
 
 type PedidoResumen = {
   id: number;
@@ -88,6 +99,8 @@ function formatearFecha(fecha: string): string {
 
 export default function PerfilScreen() {
   const router = useRouter();
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
 
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
@@ -339,14 +352,18 @@ export default function PerfilScreen() {
   };
 
   if (cargando) {
-    return <ActivityIndicator size="large" color="#5D4037" style={{ flex: 1, backgroundColor: '#FFFBF5' }} />;
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
   }
 
   // Sin sesión: invitamos a iniciar sesión o crear una cuenta.
   if (!sesion) {
     return (
       <View style={styles.centrado}>
-        <Ionicons name="person-circle-outline" size={80} color="#D7CCC8" />
+        <Ionicons name="person-circle-outline" size={80} color={theme.border} />
         <Text style={styles.vacioTitulo}>Aún no inicias sesión</Text>
         <Text style={styles.vacioTexto}>
           Inicia sesión para ver tu perfil y tus pedidos.
@@ -367,9 +384,16 @@ export default function PerfilScreen() {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scroll}
-      refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={['#5D4037']} />}>
+      refreshControl={
+        <RefreshControl
+          refreshing={refrescando}
+          onRefresh={onRefresh}
+          colors={[theme.accent]}
+          tintColor={theme.accent}
+        />
+      }>
       <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#5D4037" />
+        <Ionicons name="arrow-back" size={22} color={theme.text} />
         <Text style={styles.backText}>Regresar</Text>
       </TouchableOpacity>
 
@@ -389,7 +413,7 @@ export default function PerfilScreen() {
         </View>
         <Text style={styles.nombre}>{nombre}</Text>
         <View style={styles.chipRol}>
-          <Ionicons name="shield-checkmark-outline" size={14} color="#5D4037" />
+          <Ionicons name="shield-checkmark-outline" size={14} color={theme.heading} />
           <Text style={styles.chipRolTexto}>{ETIQUETA_ROL[rol] ?? rol}</Text>
         </View>
 
@@ -399,7 +423,7 @@ export default function PerfilScreen() {
               style={styles.avatarBoton}
               onPress={elegirFoto}
               disabled={subiendoAvatar}>
-              <Ionicons name="camera-outline" size={16} color="#5D4037" />
+              <Ionicons name="camera-outline" size={16} color={theme.text} />
               <Text style={styles.avatarBotonTexto}>
                 {subiendoAvatar ? 'Subiendo…' : 'Cambiar foto'}
               </Text>
@@ -409,7 +433,7 @@ export default function PerfilScreen() {
                 style={styles.avatarBoton}
                 onPress={() => setConfirmQuitarFoto(true)}
                 disabled={subiendoAvatar}>
-                <Ionicons name="trash-outline" size={16} color="#B71C1C" />
+                <Ionicons name="trash-outline" size={16} color={theme.danger} />
                 <Text style={[styles.avatarBotonTexto, styles.avatarBotonTextoPeligro]}>
                   Quitar foto
                 </Text>
@@ -424,27 +448,27 @@ export default function PerfilScreen() {
         {editando ? (
           <>
             <View style={styles.filaEditable}>
-              <Ionicons name="person-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <Ionicons name="person-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
               <View style={styles.filaTextos}>
                 <Text style={styles.filaEtiqueta}>Nombre completo</Text>
                 <TextInput
                   value={formNombre}
                   onChangeText={setFormNombre}
                   placeholder="Tu nombre"
-                  placeholderTextColor="#A1887F"
+                  placeholderTextColor={theme.textMuted}
                   style={styles.input}
                 />
               </View>
             </View>
             <View style={styles.filaEditable}>
-              <Ionicons name="mail-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <Ionicons name="mail-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
               <View style={styles.filaTextos}>
                 <Text style={styles.filaEtiqueta}>Correo electrónico</Text>
                 <TextInput
                   value={formEmail}
                   onChangeText={setFormEmail}
                   placeholder="correo@ejemplo.com"
-                  placeholderTextColor="#A1887F"
+                  placeholderTextColor={theme.textMuted}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   style={styles.input}
@@ -452,14 +476,14 @@ export default function PerfilScreen() {
               </View>
             </View>
             <View style={[styles.filaEditable, styles.filaSinLinea]}>
-              <Ionicons name="call-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+              <Ionicons name="call-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
               <View style={styles.filaTextos}>
                 <Text style={styles.filaEtiqueta}>Teléfono</Text>
                 <TextInput
                   value={formTelefono}
                   onChangeText={setFormTelefono}
                   placeholder="(opcional)"
-                  placeholderTextColor="#A1887F"
+                  placeholderTextColor={theme.textMuted}
                   keyboardType="phone-pad"
                   style={styles.input}
                 />
@@ -478,7 +502,7 @@ export default function PerfilScreen() {
                 onPress={guardarPerfil}
                 disabled={guardandoPerfil}>
                 {guardandoPerfil ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={theme.onAccent} />
                 ) : (
                   <Text style={styles.botonPriTexto}>Guardar cambios</Text>
                 )}
@@ -487,11 +511,17 @@ export default function PerfilScreen() {
           </>
         ) : (
           <>
-            <Fila icono="mail-outline" etiqueta="Correo" valor={correo} />
-            <Fila icono="call-outline" etiqueta="Teléfono" valor={telefono} />
-            <Fila icono="calendar-outline" etiqueta="Miembro desde" valor={perfil ? formatearFecha(perfil.creado_en) : '—'} sinLinea />
+            <Fila icono="mail-outline" etiqueta="Correo" valor={correo} colorIcono={theme.textMuted} />
+            <Fila icono="call-outline" etiqueta="Teléfono" valor={telefono} colorIcono={theme.textMuted} />
+            <Fila
+              icono="calendar-outline"
+              etiqueta="Miembro desde"
+              valor={perfil ? formatearFecha(perfil.creado_en) : '—'}
+              colorIcono={theme.textMuted}
+              sinLinea
+            />
             <TouchableOpacity style={styles.botonEditar} onPress={iniciarEdicion}>
-              <Ionicons name="create-outline" size={20} color="#5D4037" />
+              <Ionicons name="create-outline" size={20} color={theme.accent} />
               <Text style={styles.botonEditarTexto}>Editar perfil</Text>
             </TouchableOpacity>
           </>
@@ -502,7 +532,7 @@ export default function PerfilScreen() {
       <Text style={styles.seccion}>Mis pedidos</Text>
       {pedidos.length === 0 ? (
         <View style={styles.sinPedidos}>
-          <Ionicons name="receipt-outline" size={32} color="#D7CCC8" />
+          <Ionicons name="receipt-outline" size={32} color={theme.border} />
           <Text style={styles.sinPedidosTexto}>Todavía no tienes pedidos.</Text>
         </View>
       ) : (
@@ -516,12 +546,12 @@ export default function PerfilScreen() {
               <Text style={styles.pedidoFecha}>{formatearFecha(pedido.creado_en)}</Text>
             </View>
             <View style={styles.pedidoDerecha}>
-              <Text style={[styles.pedidoEstado, { color: COLOR_ESTADO[pedido.estado] ?? '#5D4037' }]}>
+              <Text style={[styles.pedidoEstado, { color: colorEstado(pedido.estado, theme) }]}>
                 {ETIQUETA_ESTADO[pedido.estado] ?? pedido.estado}
               </Text>
               <Text style={styles.pedidoTotal}>${Number(pedido.total ?? 0).toFixed(2)}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#A1887F" />
+            <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
           </TouchableOpacity>
         ))
       )}
@@ -529,17 +559,17 @@ export default function PerfilScreen() {
       {!editando && !cambiandoPwd && (
         <>
           <TouchableOpacity style={styles.botonCambiarPwd} onPress={abrirCambioPwd}>
-            <Ionicons name="key-outline" size={20} color="#5D4037" />
+            <Ionicons name="key-outline" size={20} color={theme.accent} />
             <Text style={styles.botonCambiarPwdTexto}>Cambiar contraseña</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.botonSalir} onPress={cerrar}>
-            <Ionicons name="log-out-outline" size={20} color="#B71C1C" />
+            <Ionicons name="log-out-outline" size={20} color={theme.danger} />
             <Text style={styles.botonSalirTexto}>Cerrar sesión</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.botonEliminar} onPress={() => setConfirmEliminar(true)}>
-            <Ionicons name="trash-outline" size={20} color="#B71C1C" />
+            <Ionicons name="trash-outline" size={20} color={theme.danger} />
             <Text style={styles.botonEliminarTexto}>Eliminar cuenta</Text>
           </TouchableOpacity>
         </>
@@ -549,42 +579,42 @@ export default function PerfilScreen() {
         <View style={styles.tarjeta}>
           <Text style={styles.seccion}>Cambiar contraseña</Text>
           <View style={styles.filaEditable}>
-            <Ionicons name="lock-closed-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <Ionicons name="lock-closed-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
             <View style={styles.filaTextos}>
               <Text style={styles.filaEtiqueta}>Contraseña actual</Text>
               <TextInput
                 value={pwdActual}
                 onChangeText={setPwdActual}
                 placeholder="Ingresa tu contraseña actual"
-                placeholderTextColor="#A1887F"
+                placeholderTextColor={theme.textMuted}
                 secureTextEntry
                 style={styles.input}
               />
             </View>
           </View>
           <View style={styles.filaEditable}>
-            <Ionicons name="key-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <Ionicons name="key-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
             <View style={styles.filaTextos}>
               <Text style={styles.filaEtiqueta}>Nueva contraseña</Text>
               <TextInput
                 value={pwdNueva}
                 onChangeText={setPwdNueva}
                 placeholder="Mínimo 6 caracteres"
-                placeholderTextColor="#A1887F"
+                placeholderTextColor={theme.textMuted}
                 secureTextEntry
                 style={styles.input}
               />
             </View>
           </View>
           <View style={[styles.filaEditable, styles.filaSinLinea]}>
-            <Ionicons name="checkmark-circle-outline" size={20} color="#8D6E63" style={styles.filaIcono} />
+            <Ionicons name="checkmark-circle-outline" size={20} color={theme.textMuted} style={styles.filaIcono} />
             <View style={styles.filaTextos}>
               <Text style={styles.filaEtiqueta}>Confirmar nueva contraseña</Text>
               <TextInput
                 value={pwdConfirma}
                 onChangeText={setPwdConfirma}
                 placeholder="Repite la nueva contraseña"
-                placeholderTextColor="#A1887F"
+                placeholderTextColor={theme.textMuted}
                 secureTextEntry
                 style={styles.input}
               />
@@ -603,7 +633,7 @@ export default function PerfilScreen() {
               onPress={guardarPwd}
               disabled={guardandoPwd}>
               {guardandoPwd ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={theme.onAccent} />
               ) : (
                 <Text style={styles.botonPriTexto}>Cambiar contraseña</Text>
               )}
@@ -665,16 +695,20 @@ function Fila({
   icono,
   etiqueta,
   valor,
+  colorIcono,
   sinLinea,
 }: {
   icono: React.ComponentProps<typeof Ionicons>['name'];
   etiqueta: string;
   valor: string;
+  colorIcono: string;
   sinLinea?: boolean;
 }) {
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
   return (
     <View style={[styles.fila, sinLinea && styles.filaSinLinea]}>
-      <Ionicons name={icono} size={20} color="#8D6E63" style={styles.filaIcono} />
+      <Ionicons name={icono} size={20} color={colorIcono} style={styles.filaIcono} />
       <View style={styles.filaTextos}>
         <Text style={styles.filaEtiqueta}>{etiqueta}</Text>
         <Text style={styles.filaValor}>{valor}</Text>
@@ -683,221 +717,224 @@ function Fila({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFBF5' },
-  scroll: {
-    padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 60,
-  },
-  centrado: {
-    flex: 1,
-    backgroundColor: '#FFFBF5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-  },
-  vacioTitulo: { fontSize: 18, fontWeight: 'bold', color: '#3E2723', marginTop: 15 },
-  vacioTexto: {
-    fontSize: 14,
-    color: '#8D6E63',
-    textAlign: 'center',
-    marginTop: 6,
-    marginBottom: 10,
-  },
-  back: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  backText: { color: '#5D4037', fontWeight: '600', marginLeft: 6, fontSize: 15 },
-  encabezado: { alignItems: 'center', marginBottom: 25 },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#D7CCC8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#5D4037',
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  avatarImagen: { width: '100%', height: '100%' },
-  avatarTexto: { fontSize: 34, fontWeight: 'bold', color: '#5D4037' },
-  avatarBotones: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 12,
-  },
-  avatarBoton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1.5,
-    borderColor: '#E0D5C8',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    backgroundColor: '#fff',
-  },
-  avatarBotonTexto: { color: '#5D4037', fontWeight: '600', fontSize: 13 },
-  avatarBotonTextoPeligro: { color: '#B71C1C' },
-  nombre: { fontSize: 22, fontWeight: 'bold', color: '#3E2723', textAlign: 'center' },
-  chipRol: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#F5EDE3',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    marginTop: 8,
-  },
-  chipRolTexto: { color: '#5D4037', fontWeight: '600', fontSize: 13 },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    marginBottom: 25,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  fila: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6DA',
-  },
-  filaSinLinea: { borderBottomWidth: 0 },
-  filaIcono: { marginRight: 14 },
-  filaTextos: { flex: 1 },
-  filaEtiqueta: { fontSize: 12, color: '#A1887F' },
-  filaValor: { fontSize: 16, color: '#3E2723', fontWeight: '600', marginTop: 2 },
-  seccion: { fontSize: 17, fontWeight: 'bold', color: '#3E2723', marginBottom: 12 },
-  sinPedidos: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-  },
-  sinPedidosTexto: { color: '#8D6E63', marginTop: 8 },
-  pedido: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-  },
-  pedidoInfo: { flex: 1 },
-  pedidoFolio: { fontSize: 15, fontWeight: 'bold', color: '#3E2723' },
-  pedidoFecha: { fontSize: 12, color: '#A1887F', marginTop: 2 },
-  pedidoDerecha: { alignItems: 'flex-end', marginRight: 8 },
-  pedidoEstado: { fontSize: 12, fontWeight: '600' },
-  pedidoTotal: { fontSize: 15, fontWeight: 'bold', color: '#5D4037', marginTop: 2 },
-  botonPrimario: {
-    marginTop: 20,
-    backgroundColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    alignItems: 'center',
-  },
-  botonPrimarioTexto: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  botonEditar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 16,
-    marginBottom: 4,
-    borderWidth: 1.5,
-    borderColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 12,
-  },
-  botonEditarTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
-  filaEditable: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0E6DA',
-  },
-  input: {
-    marginTop: 6,
-    backgroundColor: '#F5EDE3',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: '#3E2723',
-    fontSize: 15,
-  },
-  botonesEditar: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 16,
-  },
-  botonPri: {
-    flex: 1,
-    backgroundColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  botonPriTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
-  botonSec: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  botonSecTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
-  botonDeshabilitado: { opacity: 0.6 },
-  botonCambiarPwd: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 16,
-    borderWidth: 1.5,
-    borderColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 14,
-  },
-  botonCambiarPwdTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
-  botonSalir: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 12,
-    borderWidth: 1.5,
-    borderColor: '#B71C1C',
-    borderRadius: 12,
-    paddingVertical: 14,
-  },
-  botonSalirTexto: { color: '#B71C1C', fontWeight: 'bold', fontSize: 15 },
-  botonEliminar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 12,
-    backgroundColor: '#FFEBEE',
-    borderRadius: 12,
-    paddingVertical: 14,
-  },
-  botonEliminarTexto: { color: '#B71C1C', fontWeight: 'bold', fontSize: 15 },
-});
+function makeStyles(t: Theme, sh: ThemeShadows) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: t.bg },
+    loadingWrap: { flex: 1, backgroundColor: t.bg, alignItems: 'center', justifyContent: 'center' },
+    scroll: {
+      padding: spacing[5],
+      paddingTop: Platform.OS === 'ios' ? 60 : 40,
+      paddingBottom: spacing[16],
+    },
+    centrado: {
+      flex: 1,
+      backgroundColor: t.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing[8],
+    },
+    vacioTitulo: { fontSize: 18, fontFamily: fonts.display, fontWeight: '700', color: t.heading, marginTop: spacing[4] },
+    vacioTexto: {
+      fontSize: 14,
+      color: t.textMuted,
+      textAlign: 'center',
+      marginTop: spacing[2],
+      marginBottom: spacing[3],
+    },
+    back: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing[4] },
+    backText: { color: t.text, fontWeight: '600', marginLeft: spacing[2], fontSize: 15 },
+    encabezado: { alignItems: 'center', marginBottom: spacing[6] },
+    avatar: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      backgroundColor: t.surfaceSubtle,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: t.copper,
+      marginBottom: spacing[3],
+      overflow: 'hidden',
+    },
+    avatarImagen: { width: '100%', height: '100%' },
+    avatarTexto: { fontSize: 34, fontFamily: fonts.display, fontWeight: '700', color: t.heading },
+    avatarBotones: {
+      flexDirection: 'row',
+      gap: spacing[3],
+      marginTop: spacing[3],
+    },
+    avatarBoton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing[2],
+      borderWidth: 1.5,
+      borderColor: t.border,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing[4],
+      paddingVertical: 7,
+      backgroundColor: t.surface,
+    },
+    avatarBotonTexto: { color: t.text, fontWeight: '600', fontSize: 13 },
+    avatarBotonTextoPeligro: { color: t.danger },
+    nombre: { fontSize: 24, fontFamily: fonts.display, fontWeight: '700', color: t.heading, textAlign: 'center' },
+    chipRol: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      backgroundColor: t.surfaceSubtle,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing[3],
+      paddingVertical: 5,
+      marginTop: spacing[2],
+    },
+    chipRolTexto: { color: t.heading, fontWeight: '600', fontSize: 13 },
+    tarjeta: {
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.lg,
+      paddingHorizontal: spacing[4],
+      paddingVertical: spacing[2],
+      marginBottom: spacing[6],
+      ...sh.sm,
+    },
+    fila: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing[4],
+      borderBottomWidth: 1,
+      borderBottomColor: t.border,
+    },
+    filaSinLinea: { borderBottomWidth: 0 },
+    filaIcono: { marginRight: spacing[4] },
+    filaTextos: { flex: 1 },
+    filaEtiqueta: { fontSize: 12, color: t.textMuted },
+    filaValor: { fontSize: 16, color: t.text, fontWeight: '600', marginTop: 2 },
+    seccion: { fontSize: 18, fontFamily: fonts.display, fontWeight: '700', color: t.heading, marginBottom: spacing[3] },
+    sinPedidos: {
+      alignItems: 'center',
+      paddingVertical: spacing[8],
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.lg,
+    },
+    sinPedidosTexto: { color: t.textMuted, marginTop: spacing[2] },
+    pedido: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.md,
+      padding: spacing[4],
+      marginBottom: spacing[3],
+      ...sh.sm,
+    },
+    pedidoInfo: { flex: 1 },
+    pedidoFolio: { fontSize: 15, fontWeight: '700', color: t.text },
+    pedidoFecha: { fontSize: 12, color: t.textMuted, marginTop: 2 },
+    pedidoDerecha: { alignItems: 'flex-end', marginRight: spacing[2] },
+    pedidoEstado: { fontSize: 12, fontWeight: '600' },
+    pedidoTotal: { fontSize: 15, fontWeight: '700', color: t.accent, marginTop: 2 },
+    botonPrimario: {
+      marginTop: spacing[5],
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      paddingHorizontal: spacing[10],
+      alignItems: 'center',
+    },
+    botonPrimarioTexto: { color: t.onAccent, fontWeight: '700', fontSize: 16 },
+    botonEditar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing[2],
+      marginTop: spacing[4],
+      marginBottom: spacing[1],
+      borderWidth: 1.5,
+      borderColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[3],
+    },
+    botonEditarTexto: { color: t.accent, fontWeight: '700', fontSize: 15 },
+    filaEditable: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: spacing[4],
+      borderBottomWidth: 1,
+      borderBottomColor: t.border,
+    },
+    input: {
+      marginTop: spacing[2],
+      backgroundColor: t.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.sm,
+      paddingHorizontal: spacing[3],
+      paddingVertical: spacing[3],
+      color: t.text,
+      fontSize: 15,
+    },
+    botonesEditar: {
+      flexDirection: 'row',
+      gap: spacing[3],
+      marginTop: spacing[4],
+    },
+    botonPri: {
+      flex: 1,
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[3],
+      alignItems: 'center',
+    },
+    botonPriTexto: { color: t.onAccent, fontWeight: '700', fontSize: 15 },
+    botonSec: {
+      flex: 1,
+      backgroundColor: t.surface,
+      borderWidth: 1.5,
+      borderColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[3],
+      alignItems: 'center',
+    },
+    botonSecTexto: { color: t.accent, fontWeight: '700', fontSize: 15 },
+    botonDeshabilitado: { opacity: 0.6 },
+    botonCambiarPwd: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing[2],
+      marginTop: spacing[4],
+      borderWidth: 1.5,
+      borderColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+    },
+    botonCambiarPwdTexto: { color: t.accent, fontWeight: '700', fontSize: 15 },
+    botonSalir: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing[2],
+      marginTop: spacing[3],
+      borderWidth: 1.5,
+      borderColor: t.danger,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+    },
+    botonSalirTexto: { color: t.danger, fontWeight: '700', fontSize: 15 },
+    botonEliminar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing[2],
+      marginTop: spacing[3],
+      backgroundColor: alpha(t.danger, 0.14),
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+    },
+    botonEliminarTexto: { color: t.danger, fontWeight: '700', fontSize: 15 },
+  });
+}

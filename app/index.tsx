@@ -1,12 +1,24 @@
+// =====================================================================
+//  PISTOLET · Pantalla de inicio de sesion
+//
+//  Es la ruta raiz ("/"). Antes vivia dentro del grupo (tabs)/, lo que
+//  hacia que el login apareciera con barra inferior; ahora es una
+//  pantalla del Stack raiz, a pantalla completa.
+// =====================================================================
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
+import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
 import { login } from '@/lib/auth';
+import { useTheme, type ThemeShadows } from '@/lib/theme';
 
-export default function HomeScreen() {
+export default function LoginScreen() {
   const router = useRouter();
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
+
   // Al crear una cuenta redirigimos aquí con el correo ya escrito.
   const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
   const [email, setEmail] = useState(emailParam ?? '');
@@ -78,29 +90,29 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {/* --- LOGO DE LA PANADERÍA --- */}
-      <Image 
-        source={require('../../assets/images/MainLogo.png')}
+      <Image
+        source={require('../assets/images/MainLogo.png')}
         style={styles.logo}
         resizeMode="cover"
       />
 
       <Text style={styles.title}>Pistolet</Text>
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Correo" 
-        placeholderTextColor="#8D6E63"
+
+      <TextInput
+        style={styles.input}
+        placeholder="Correo"
+        placeholderTextColor={theme.textMuted}
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Contraseña" 
-        placeholderTextColor="#8D6E63"
-        secureTextEntry 
+
+      <TextInput
+        style={styles.input}
+        placeholder="Contraseña"
+        placeholderTextColor={theme.textMuted}
+        secureTextEntry
         onChangeText={setPassword}
       />
 
@@ -129,7 +141,7 @@ export default function HomeScreen() {
       <ModalAviso
         visible={bienvenida.visible}
         tipo="exito"
-        titulo="¡Bienvenido a Pistolet Móvil!"
+        titulo="¡Bienvenido a Pistolet!"
         mensaje={`Hola ${bienvenida.nombre}, vamos al catálogo.`}
         textoBoton="Continuar"
         onCerrar={irACatalogo}
@@ -148,69 +160,72 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFFBF5', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    padding: 30 
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 20, // Borde ligeramente redondeado
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#D7CCC8',
-  },
-  title: { 
-    fontSize: 28, 
-    fontWeight: 'bold', 
-    color: '#5D4037', 
-    marginBottom: 40 
-  },
-  input: { 
-    width: '100%', 
-    height: 55, 
-    backgroundColor: '#F5EDE3', 
-    borderRadius: 10, 
-    marginBottom: 20, 
-    paddingHorizontal: 15, 
-    color: '#5D4037' 
-  },
-  button: { 
-    backgroundColor: '#5D4037', 
-    padding: 18, 
-    borderRadius: 12, 
-    width: '100%', 
-    alignItems: 'center', 
-    marginTop: 10, 
-    shadowColor: "#000", 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.25, 
-    shadowRadius: 3.84, 
-    elevation: 5 
-  },
-  buttonText: { 
-    color: '#fff', 
-    fontWeight: 'bold', 
-    fontSize: 16 
-  },
-  footer: { 
-    marginTop: 30, 
-    color: '#A1887F', 
-    fontSize: 12 
-  },
-  link: { 
-    marginTop: 18 
-  },
-  linkText: { 
-    color: '#8D6E63', 
-    fontSize: 14 
-  },
-  linkStrong: { 
-    color: '#5D4037', 
-    fontWeight: 'bold' 
-  }
-});
+function makeStyles(t: Theme, sh: ThemeShadows) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: t.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing[8],
+    },
+    logo: {
+      width: 120,
+      height: 120,
+      borderRadius: radii.lg,
+      marginBottom: spacing[5],
+      borderWidth: 2,
+      borderColor: t.border,
+    },
+    title: {
+      fontSize: 34,
+      fontFamily: fonts.display,
+      fontWeight: '700',
+      color: t.heading,
+      marginBottom: spacing[10],
+    },
+    input: {
+      width: '100%',
+      height: 55,
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.md,
+      marginBottom: spacing[5],
+      paddingHorizontal: spacing[4],
+      color: t.text,
+      fontSize: 16,
+    },
+    button: {
+      backgroundColor: t.accent,
+      padding: 18,
+      borderRadius: radii.md,
+      width: '100%',
+      alignItems: 'center',
+      marginTop: spacing[2],
+      ...sh.md,
+    },
+    buttonText: {
+      color: t.onAccent,
+      fontWeight: '700',
+      fontSize: 16,
+      letterSpacing: 1,
+    },
+    footer: {
+      marginTop: spacing[8],
+      color: t.textMuted,
+      fontSize: 12,
+    },
+    link: {
+      marginTop: spacing[5],
+    },
+    linkText: {
+      color: t.textMuted,
+      fontSize: 14,
+    },
+    linkStrong: {
+      color: t.accent,
+      fontWeight: '700',
+    },
+  });
+}

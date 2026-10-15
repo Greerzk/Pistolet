@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -13,7 +13,9 @@ import {
 
 import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
 import { API_URL } from '@/constants/api';
+import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
 import { api } from '@/lib/auth';
+import { useTheme, type ThemeShadows } from '@/lib/theme';
 
 const ETIQUETAS_ESTADO: Record<string, string> = {
   pendiente: 'Pendiente de confirmar',
@@ -22,15 +24,6 @@ const ETIQUETAS_ESTADO: Record<string, string> = {
   listo: 'Listo para recoger',
   entregado: 'Entregado',
   cancelado: 'Cancelado',
-};
-
-const COLOR_ESTADO: Record<string, string> = {
-  pendiente: '#8D6E63',
-  confirmado: '#5D4037',
-  en_preparacion: '#C8963E',
-  listo: '#2E7D32',
-  entregado: '#2E7D32',
-  cancelado: '#B71C1C',
 };
 
 const ESTADOS_FINALES = ['entregado', 'cancelado'];
@@ -56,8 +49,28 @@ type Pedido = {
 
 export default function EstadoPedidoScreen() {
   const router = useRouter();
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const pedidoId = Number(id);
+
+  const colorEstado = (estado: string): string => {
+    switch (estado) {
+      case 'pendiente':
+        return theme.textMuted;
+      case 'confirmado':
+        return theme.copper;
+      case 'en_preparacion':
+        return theme.accent;
+      case 'listo':
+      case 'entregado':
+        return theme.success;
+      case 'cancelado':
+        return theme.danger;
+      default:
+        return theme.accent;
+    }
+  };
 
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,8 +99,6 @@ export default function EstadoPedidoScreen() {
   }, [pedidoId]);
 
   useEffect(() => {
-    // Carga de datos al montar (patrón estándar en RN). La regla
-    // `set-state-in-effect` de React Compiler da falso positivo aquí.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     cargarPedido();
   }, [cargarPedido]);
@@ -119,13 +130,17 @@ export default function EstadoPedidoScreen() {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#5D4037" style={{ flex: 1 }} />;
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
   }
 
   if (!pedido) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="document-text-outline" size={64} color="#D7CCC8" />
+        <Ionicons name="document-text-outline" size={64} color={theme.border} />
         <Text style={styles.emptyTitle}>No encontramos este pedido</Text>
         <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace('/catalogo')}>
           <Text style={styles.primaryButtonText}>Volver al catálogo</Text>
@@ -134,7 +149,7 @@ export default function EstadoPedidoScreen() {
     );
   }
 
-  const colorEstado = COLOR_ESTADO[pedido.estado] ?? '#5D4037';
+  const estadoColor = colorEstado(pedido.estado);
   const sePuedeCancelar = SE_PUEDE_CANCELAR.includes(pedido.estado);
 
   return (
@@ -145,9 +160,9 @@ export default function EstadoPedidoScreen() {
           {new Date(pedido.creado_en).toLocaleString('es-MX')}
         </Text>
 
-        <View style={[styles.statusBadge, { backgroundColor: colorEstado + '22' }]}>
-          <View style={[styles.statusDot, { backgroundColor: colorEstado }]} />
-          <Text style={[styles.statusText, { color: colorEstado }]}>
+        <View style={[styles.statusBadge, { backgroundColor: estadoColor + '22', borderColor: estadoColor + '55' }]}>
+          <View style={[styles.statusDot, { backgroundColor: estadoColor }]} />
+          <Text style={[styles.statusText, { color: estadoColor }]}>
             {ETIQUETAS_ESTADO[pedido.estado] ?? pedido.estado}
           </Text>
         </View>
@@ -179,7 +194,7 @@ export default function EstadoPedidoScreen() {
             disabled={cancelando}
             onPress={solicitarCancelar}>
             {cancelando ? (
-              <ActivityIndicator color="#B71C1C" />
+              <ActivityIndicator color={theme.danger} />
             ) : (
               <Text style={styles.secondaryButtonText}>Cancelar pedido</Text>
             )}
@@ -211,74 +226,80 @@ export default function EstadoPedidoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFBF5',
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-  },
-  content: { padding: 20, paddingBottom: 30 },
-  folio: { fontSize: 22, fontWeight: 'bold', color: '#3E2723' },
-  date: { fontSize: 13, color: '#8D6E63', marginTop: 4 },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    marginTop: 14,
-  },
-  statusDot: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
-  statusText: { fontSize: 14, fontWeight: '700' },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#3E2723',
-    marginTop: 25,
-    marginBottom: 8,
-  },
-  lineaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EFE3D5',
-  },
-  lineaNombre: { color: '#5D4037', fontSize: 14, flex: 1, paddingRight: 10 },
-  lineaTotal: { color: '#5D4037', fontWeight: '600' },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 18,
-  },
-  totalLabel: { fontSize: 16, color: '#5D4037' },
-  totalValue: { fontSize: 20, fontWeight: 'bold', color: '#3E2723' },
-  notas: { fontSize: 13, color: '#8D6E63', marginTop: 12, fontStyle: 'italic' },
-  footer: { padding: 15, gap: 10 },
-  primaryButton: {
-    backgroundColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  primaryButtonDisabled: { opacity: 0.6 },
-  primaryButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  secondaryButton: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#B71C1C',
-  },
-  secondaryButtonText: { color: '#B71C1C', fontWeight: 'bold', fontSize: 16 },
-  emptyContainer: {
-    flex: 1,
-    backgroundColor: '#FFFBF5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-  },
-  emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#3E2723', marginTop: 15, marginBottom: 25 },
-});
+function makeStyles(t: Theme, sh: ThemeShadows) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: t.bg,
+      paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    },
+    loadingWrap: { flex: 1, backgroundColor: t.bg, alignItems: 'center', justifyContent: 'center' },
+    content: { padding: spacing[5], paddingBottom: spacing[8] },
+    folio: { fontSize: 24, fontFamily: fonts.display, fontWeight: '700', color: t.heading },
+    date: { fontSize: 13, color: t.textMuted, marginTop: spacing[1] },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      borderRadius: radii.pill,
+      borderWidth: 1,
+      paddingHorizontal: spacing[4],
+      paddingVertical: spacing[2],
+      marginTop: spacing[4],
+    },
+    statusDot: { width: 10, height: 10, borderRadius: 5, marginRight: spacing[2] },
+    statusText: { fontSize: 14, fontWeight: '700' },
+    sectionTitle: {
+      fontSize: 17,
+      fontFamily: fonts.display,
+      fontWeight: '700',
+      color: t.heading,
+      marginTop: spacing[6],
+      marginBottom: spacing[2],
+    },
+    lineaRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: spacing[2],
+      borderBottomWidth: 1,
+      borderBottomColor: t.border,
+    },
+    lineaNombre: { color: t.text, fontSize: 14, flex: 1, paddingRight: spacing[3] },
+    lineaTotal: { color: t.text, fontWeight: '600' },
+    totalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: spacing[5],
+    },
+    totalLabel: { fontSize: 16, color: t.text },
+    totalValue: { fontSize: 20, fontWeight: '700', color: t.accent },
+    notas: { fontSize: 13, color: t.textMuted, marginTop: spacing[3], fontStyle: 'italic' },
+    footer: { padding: spacing[4], gap: spacing[3] },
+    primaryButton: {
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+      ...sh.sm,
+    },
+    primaryButtonDisabled: { opacity: 0.6 },
+    primaryButtonText: { color: t.onAccent, fontWeight: '700', fontSize: 16 },
+    secondaryButton: {
+      backgroundColor: t.surface,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: t.danger,
+    },
+    secondaryButtonText: { color: t.danger, fontWeight: '700', fontSize: 16 },
+    emptyContainer: {
+      flex: 1,
+      backgroundColor: t.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing[8],
+    },
+    emptyTitle: { fontSize: 18, fontFamily: fonts.display, fontWeight: '700', color: t.heading, marginTop: spacing[4], marginBottom: spacing[6] },
+  });
+}

@@ -2,23 +2,28 @@
 //  PISTOLET · Modal de aviso reutilizable
 //
 //  Muestra mensajes de éxito, error, información o advertencia con el
-//  estilo de la marca. Toda notificación al usuario sale en un modal
-//  (nunca en consola ni en diálogos genéricos del sistema).
+//  estilo de la marca (tema claro/oscuro). Toda notificación al usuario
+//  sale en un modal.
 // =====================================================================
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
+import { alpha, useTheme, type ThemeShadows } from '@/lib/theme';
 
 export type TipoAviso = 'exito' | 'error' | 'info' | 'aviso';
 
 type Icono = React.ComponentProps<typeof Ionicons>['name'];
 
-const ESTILOS_POR_TIPO: Record<TipoAviso, { icono: Icono; color: string; fondo: string }> = {
-  exito: { icono: 'checkmark-circle', color: '#2E7D32', fondo: '#E8F5E9' },
-  error: { icono: 'close-circle', color: '#B71C1C', fondo: '#FFEBEE' },
-  info: { icono: 'information-circle', color: '#1565C0', fondo: '#E3F2FD' },
-  aviso: { icono: 'alert-circle', color: '#C8963E', fondo: '#FFF8E1' },
-};
+function estiloPorTipo(t: Theme): Record<TipoAviso, { icono: Icono; color: string }> {
+  return {
+    exito: { icono: 'checkmark-circle', color: t.success },
+    error: { icono: 'close-circle', color: t.danger },
+    info: { icono: 'information-circle', color: t.info },
+    aviso: { icono: 'alert-circle', color: t.warning },
+  };
+}
 
 type Props = {
   visible: boolean;
@@ -42,14 +47,16 @@ export default function ModalAviso({
   textoCancelar,
   onCancelar,
 }: Props) {
-  const estilo = ESTILOS_POR_TIPO[tipo];
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
+  const estilo = estiloPorTipo(theme)[tipo];
   const esConfirmacion = Boolean(textoCancelar && onCancelar);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCerrar}>
       <View style={styles.backdrop}>
         <View style={styles.tarjeta}>
-          <View style={[styles.iconoContenedor, { backgroundColor: estilo.fondo }]}>
+          <View style={[styles.iconoContenedor, { backgroundColor: alpha(estilo.color, 0.16) }]}>
             <Ionicons name={estilo.icono} size={46} color={estilo.color} />
           </View>
           <Text style={styles.titulo}>{titulo}</Text>
@@ -58,7 +65,7 @@ export default function ModalAviso({
           {esConfirmacion ? (
             <View style={styles.botoneraConfirmacion}>
               <TouchableOpacity
-                style={[styles.botonSecundario, { borderColor: '#A1887F' }]}
+                style={styles.botonSecundario}
                 onPress={onCancelar}
                 activeOpacity={0.85}>
                 <Text style={styles.botonSecundarioTexto}>{textoCancelar}</Text>
@@ -78,80 +85,82 @@ export default function ModalAviso({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(62, 39, 35, 0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-  },
-  tarjeta: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#FFFBF5',
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-  },
-  iconoContenedor: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  titulo: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    color: '#3E2723',
-    textAlign: 'center',
-  },
-  mensaje: {
-    fontSize: 15,
-    color: '#6D4C41',
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 21,
-  },
-  boton: {
-    marginTop: 22,
-    alignSelf: 'stretch',
-    backgroundColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  botonTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
-  botoneraConfirmacion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 22,
-    alignSelf: 'stretch',
-  },
-  botonSecundario: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  botonSecundarioTexto: { color: '#5D4037', fontWeight: 'bold', fontSize: 15 },
-  botonPrimario: {
-    flex: 1,
-    backgroundColor: '#5D4037',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  botonPrimarioTexto: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
-});
+function makeStyles(t: Theme, sh: ThemeShadows) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: alpha(t.inverseBg, 0.72),
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing[8],
+    },
+    tarjeta: {
+      width: '100%',
+      maxWidth: 360,
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.xl,
+      padding: spacing[6],
+      alignItems: 'center',
+      ...sh.lg,
+    },
+    iconoContenedor: {
+      width: 84,
+      height: 84,
+      borderRadius: 42,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing[4],
+    },
+    titulo: {
+      fontSize: 19,
+      fontFamily: fonts.display,
+      fontWeight: '700',
+      color: t.heading,
+      textAlign: 'center',
+    },
+    mensaje: {
+      fontSize: 15,
+      color: t.textMuted,
+      textAlign: 'center',
+      marginTop: spacing[2],
+      lineHeight: 21,
+    },
+    boton: {
+      marginTop: spacing[6],
+      alignSelf: 'stretch',
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+    },
+    botonTexto: { color: t.onAccent, fontWeight: '700', fontSize: 15 },
+    botoneraConfirmacion: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing[3],
+      marginTop: spacing[6],
+      alignSelf: 'stretch',
+    },
+    botonSecundario: {
+      flex: 1,
+      borderWidth: 1.5,
+      borderColor: t.border,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+      backgroundColor: t.surface,
+    },
+    botonSecundarioTexto: { color: t.text, fontWeight: '700', fontSize: 15 },
+    botonPrimario: {
+      flex: 1,
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+    },
+    botonPrimarioTexto: { color: t.onAccent, fontWeight: '700', fontSize: 15 },
+  });
+}

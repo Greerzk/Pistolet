@@ -5,7 +5,7 @@
 // =====================================================================
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -18,12 +18,16 @@ import {
 } from 'react-native';
 
 import ModalAviso, { TipoAviso } from '@/components/modal-aviso';
+import { fonts, radii, spacing, type Theme } from '@/constants/design.generated';
 import { registrarCliente } from '@/lib/auth';
+import { useTheme, type ThemeShadows } from '@/lib/theme';
 
 const RE_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegistroScreen() {
   const router = useRouter();
+  const { theme, shadows } = useTheme();
+  const styles = useMemo(() => makeStyles(theme, shadows), [theme, shadows]);
 
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
@@ -98,13 +102,13 @@ export default function RegistroScreen() {
 
   const irALogin = () => {
     setExito(false);
-    router.replace(`/(tabs)?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+    router.replace(`/?email=${encodeURIComponent(email.trim().toLowerCase())}`);
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#5D4037" />
+        <Ionicons name="arrow-back" size={22} color={theme.text} />
         <Text style={styles.backText}>Regresar</Text>
       </TouchableOpacity>
 
@@ -117,7 +121,7 @@ export default function RegistroScreen() {
           value={nombre}
           onChangeText={setNombre}
           placeholder="Tu nombre y apellidos"
-          placeholderTextColor="#A1887F"
+          placeholderTextColor={theme.textMuted}
           style={styles.input}
           autoCapitalize="words"
         />
@@ -127,7 +131,7 @@ export default function RegistroScreen() {
           value={email}
           onChangeText={setEmail}
           placeholder="correo@ejemplo.com"
-          placeholderTextColor="#A1887F"
+          placeholderTextColor={theme.textMuted}
           style={styles.input}
           autoCapitalize="none"
           keyboardType="email-address"
@@ -138,7 +142,7 @@ export default function RegistroScreen() {
           value={telefono}
           onChangeText={setTelefono}
           placeholder="0000000000"
-          placeholderTextColor="#A1887F"
+          placeholderTextColor={theme.textMuted}
           style={styles.input}
           keyboardType="phone-pad"
         />
@@ -148,7 +152,7 @@ export default function RegistroScreen() {
           value={password}
           onChangeText={setPassword}
           placeholder="Mínimo 6 caracteres"
-          placeholderTextColor="#A1887F"
+          placeholderTextColor={theme.textMuted}
           style={styles.input}
           secureTextEntry
         />
@@ -158,7 +162,7 @@ export default function RegistroScreen() {
           value={confirma}
           onChangeText={setConfirma}
           placeholder="Repite tu contraseña"
-          placeholderTextColor="#A1887F"
+          placeholderTextColor={theme.textMuted}
           style={styles.input}
           secureTextEntry
         />
@@ -168,13 +172,13 @@ export default function RegistroScreen() {
           onPress={registrar}
           disabled={cargando}>
           {cargando ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={theme.onAccent} />
           ) : (
             <Text style={styles.botonTexto}>Crear cuenta</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.link} onPress={() => router.replace('/(tabs)')}>
+        <TouchableOpacity style={styles.link} onPress={() => router.replace('/')}>
           <Text style={styles.linkTexto}>
             ¿Ya tienes cuenta? <Text style={styles.linkStrong}>Inicia sesión</Text>
           </Text>
@@ -204,24 +208,48 @@ export default function RegistroScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFBF5' },
-  content: {
-    padding: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 60,
-  },
-  back: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  backText: { color: '#5D4037', fontWeight: '600', marginLeft: 6, fontSize: 15 },
-  titulo: { fontSize: 26, fontWeight: 'bold', color: '#3E2723' },
-  subtitulo: { fontSize: 15, color: '#8D6E63', marginTop: 4, marginBottom: 20 },
-  form: { backgroundColor: '#fff', borderRadius: 16, padding: 18, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
-  label: { fontSize: 14, fontWeight: '600', color: '#5D4037', marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: '#F5EDE3', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 12, color: '#3E2723', fontSize: 15 },
-  boton: { marginTop: 22, backgroundColor: '#5D4037', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
-  botonDeshabilitado: { opacity: 0.6 },
-  botonTexto: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  link: { marginTop: 16, alignItems: 'center' },
-  linkTexto: { color: '#8D6E63', fontSize: 15 },
-  linkStrong: { color: '#5D4037', fontWeight: 'bold' },
-});
+function makeStyles(t: Theme, sh: ThemeShadows) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: t.bg },
+    content: {
+      padding: spacing[5],
+      paddingTop: Platform.OS === 'ios' ? 60 : 40,
+      paddingBottom: spacing[16],
+    },
+    back: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing[4] },
+    backText: { color: t.text, fontWeight: '600', marginLeft: spacing[2], fontSize: 15 },
+    titulo: { fontSize: 30, fontFamily: fonts.display, fontWeight: '700', color: t.heading },
+    subtitulo: { fontSize: 15, color: t.textMuted, marginTop: spacing[1], marginBottom: spacing[5] },
+    form: {
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.lg,
+      padding: spacing[5],
+      ...sh.md,
+    },
+    label: { fontSize: 14, fontWeight: '600', color: t.text, marginBottom: spacing[2], marginTop: spacing[3] },
+    input: {
+      backgroundColor: t.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderRadius: radii.sm,
+      paddingHorizontal: spacing[3],
+      paddingVertical: spacing[3],
+      color: t.text,
+      fontSize: 15,
+    },
+    boton: {
+      marginTop: spacing[5],
+      backgroundColor: t.accent,
+      borderRadius: radii.md,
+      paddingVertical: spacing[4],
+      alignItems: 'center',
+    },
+    botonDeshabilitado: { opacity: 0.6 },
+    botonTexto: { color: t.onAccent, fontWeight: '700', fontSize: 16 },
+    link: { marginTop: spacing[4], alignItems: 'center' },
+    linkTexto: { color: t.textMuted, fontSize: 15 },
+    linkStrong: { color: t.accent, fontWeight: '700' },
+  });
+}
