@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LucideMapPin, LucidePhone } from '@lucide/angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, LucideMapPin, LucidePhone],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })

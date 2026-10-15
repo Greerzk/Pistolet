@@ -54,29 +54,49 @@
     <router-outlet></router-outlet>
 </main>
 
-<footer class="py-4 mt-auto">
+<footer class="ps-footer mt-auto">
   <div class="container">
-    <div class="row text-center text-md-start align-items-center">
+    <div class="row g-4 g-lg-5 align-items-start">
 
-      <div class="col-md-4 mb-3">
-        <h6 class="text-uppercase fw-bold">Contacto</h6>
-        <p class="mb-1">📍 Calle 21 No.219 Avs. 2 y 4, Córdoba, Ver.</p>
-        <p class="mb-0">☎ 272 212 0201</p>
+      <!-- Marca -->
+      <div class="col-lg-5">
+        <a class="ps-footer-brand" routerLink="/">
+          <img src="img/PISTOLET 2.png" alt="Pistolet" width="64" height="64" class="ps-footer-logo">
+          <span class="ps-footer-wordmark">Pistolet</span>
+        </a>
+        <p class="ps-footer-tagline">
+          Panadería artesanal desde 1997. Hecho con calma, compartido con gusto.
+        </p>
       </div>
 
-      <div class="col-md-4 mb-3 text-center">
-        <h6 class="text-uppercase fw-bold">© 2026 Panadería Pistolet</h6>
-        <p class="small mb-0">Todos los derechos reservados</p>
+      <!-- Contacto -->
+      <div class="col-sm-6 col-lg-4">
+        <h6 class="ps-footer-title">Contacto</h6>
+        <ul class="ps-footer-list">
+          <li>
+            <svg lucideMapPin [size]="18" aria-hidden="true"></svg>
+            <span>Calle 21 No. 219, Avs. 2 y 4,<br>Córdoba, Ver.</span>
+          </li>
+          <li>
+            <svg lucidePhone [size]="18" aria-hidden="true"></svg>
+            <a href="tel:+522722120201">272 212 0201</a>
+          </li>
+        </ul>
       </div>
 
-      <div class="col-md-4 text-md-end">
-        <h6 class="text-uppercase fw-bold">Redes</h6>
-        <a href="#" class="text-decoration-none me-2">Facebook</a>
-        <a href="#" class="text-decoration-none">Instagram</a>
-        <br>
-        <a routerLink="/admin/login" class="small text-decoration-none mt-1 d-inline-block">⚙️ Acceso Admin</a>
+      <!-- Redes -->
+      <div class="col-sm-6 col-lg-3">
+        <h6 class="ps-footer-title">Redes</h6>
+        <a class="ps-footer-social" href="https://www.facebook.com/share/18LX8pKjXB/" target="_blank" rel="noopener">
+          <i class="bi bi-facebook" aria-hidden="true"></i>
+          <span>@PistoletPanaderia</span>
+        </a>
       </div>
 
     </div>
+
+    <hr class="ps-footer-rule">
+
+    <p class="ps-footer-legal">© 2026 Panadería Pistolet · Todos los derechos reservados</p>
   </div>
 </footer>

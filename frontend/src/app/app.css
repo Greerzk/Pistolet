@@ -1,0 +1,118 @@
+/* =====================================================================
+   PISTOLET · Componente raíz (navbar + footer)
+   ---------------------------------------------------------------------
+   Los colores base del <footer> viven en styles.css (tokens --ps-*).
+   Aquí solo se define la estructura y el detalle del pie de página.
+   ===================================================================== */
+
+.ps-footer {
+  padding-top: 3rem;
+  padding-bottom: 1.75rem;
+}
+
+/* ---------- Marca ---------- */
+.ps-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ps-footer-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 0.9rem;
+}
+
+.ps-footer-wordmark {
+  color: var(--ps-accent);
+  font-family: 'PistoletFont', Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ps-footer-tagline {
+  max-width: 22rem;
+  margin: 0;
+  color: color-mix(in srgb, var(--ps-inverse-text) 78%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ---------- Columnas ---------- */
+.ps-footer-title {
+  margin-bottom: 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+}
+
+.ps-footer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ps-footer-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  color: color-mix(in srgb, var(--ps-inverse-text) 85%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ps-footer-list svg {
+  flex: none;
+  margin-top: 0.12rem;
+  color: var(--ps-accent);
+}
+
+/* ---------- Redes ---------- */
+.ps-footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--ps-inverse-text) 24%, transparent);
+  border-radius: var(--ps-radius-pill);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.ps-footer-social i {
+  color: var(--ps-accent);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.ps-footer-social:hover {
+  border-color: var(--ps-accent);
+  background-color: color-mix(in srgb, var(--ps-accent) 20%, transparent);
+  transform: translateY(-2px);
+}
+
+/* ---------- Pie legal ---------- */
+.ps-footer-rule {
+  margin: 2.25rem 0 1.25rem;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--ps-inverse-text) 20%, transparent);
+  opacity: 1;
+}
+
+.ps-footer-legal {
+  margin: 0;
+  color: color-mix(in srgb, var(--ps-inverse-text) 70%, transparent);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-footer-social {
+    transition: none;
+  }
+}
